@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$SOLARIO — To The Moon</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+/* ── RESET & BASE ── */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#f7c948;--gold2:#ffd700;--orange:#ff6b00;--red:#e63946;
+  --dark:#04040f;--panel:#0a0a1e;--deep:#060612;
+  --green:#00ff9d;--blue:#3b82f6;--purple:#7c3aed;
+  --font-pixel:'Press Start 2P',monospace;
+  --font-orb:'Orbitron',monospace;
+  --font-mono:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:#fff;font-family:var(--font-mono);overflow-x:hidden;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#000;}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 40px;
+  background:rgba(4,4,15,.88);
+  border-bottom:1px solid rgba(247,201,72,.2);
+  backdrop-filter:blur(12px);
+}
+.nav-logo{
+  font-family:var(--font-pixel);font-size:13px;
+  background:linear-gradient(135deg,var(--gold),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:1px;
+}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{
+  font-family:var(--font-pixel);font-size:7px;color:#888;text-decoration:none;
+  letter-spacing:1px;transition:color .2s;
+}
+.nav-links a:hover{color:var(--gold);}
+.nav-cta{
+  font-family:var(--font-pixel);font-size:7px;padding:10px 18px;
+  background:linear-gradient(135deg,var(--gold),var(--orange));
+  color:#000;border:none;cursor:pointer;letter-spacing:1px;
+  box-shadow:0 3px 0 #7a3000;transition:all .08s;text-decoration:none;
+  display:inline-block;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 0 #7a3000,0 0 20px #f7c94866;}
+.nav-cta:active{transform:translateY(1px);box-shadow:0 2px 0 #7a3000;}
+#hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+#hamburger span{width:24px;height:2px;background:var(--gold);display:block;transition:all .3s;}
+#mobile-menu{display:none;position:fixed;inset:0;background:rgba(4,4,15,.98);z-index:99;flex-direction:column;align-items:center;justify-content:center;gap:30px;}
+#mobile-menu a{font-family:var(--font-pixel);font-size:12px;color:var(--gold);text-decoration:none;}
+#mobile-menu.open{display:flex;}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:80px 20px 40px;
+  background:radial-gradient(ellipse at 50% -10%,#1a0a3a 0%,var(--dark) 65%);
+}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:900px;}
+.hero-tag{
+  display:inline-block;margin-bottom:20px;
+  font-family:var(--font-pixel);font-size:7px;
+  padding:7px 14px;border:1px solid var(--gold);
+  color:var(--gold);letter-spacing:2px;
+  animation:fadeSlide .8s ease both;
+}
+.hero-title{
+  font-family:var(--font-pixel);
+  font-size:clamp(24px,7vw,72px);
+  line-height:1.3;margin-bottom:24px;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--orange) 50%,var(--red) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 30px #f7c94866);
+  animation:fadeSlide .9s ease .1s both;
+}
+.hero-sub{
+  font-size:clamp(12px,2vw,18px);color:#aaa;margin-bottom:40px;line-height:1.8;
+  animation:fadeSlide .9s ease .2s both;
+  font-family:var(--font-mono);
+}
+.hero-sub span{color:var(--gold);}
+.hero-btns{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+  animation:fadeSlide .9s ease .3s both;
+}
+.btn-primary{
+  font-family:var(--font-pixel);font-size:9px;padding:16px 28px;
+  background:linear-gradient(135deg,var(--gold),var(--orange));
+  color:#000;border:none;cursor:pointer;letter-spacing:1px;
+  box-shadow:0 4px 0 #7a3000,0 0 30px #f7c94855;
+  transition:all .1s;text-decoration:none;display:inline-block;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 0 #7a3000,0 0 50px #f7c94888;}
+.btn-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #7a3000;}
+.btn-outline{
+  font-family:var(--font-pixel);font-size:9px;padding:15px 28px;
+  background:transparent;color:var(--gold);
+  border:2px solid var(--gold);cursor:pointer;letter-spacing:1px;
+  transition:all .1s;text-decoration:none;display:inline-block;
+}
+.btn-outline:hover{background:rgba(247,201,72,.12);box-shadow:0 0 20px #f7c94844;}
+
+/* scroll arrow */
+.scroll-hint{
+  position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+  font-family:var(--font-pixel);font-size:7px;color:#555;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  animation:bounce 2s infinite;
+}
+.scroll-hint::after{content:'▼';font-size:10px;color:var(--gold);}
+
+/* ── TICKER ── */
+.ticker-wrap{
+  background:linear-gradient(90deg,#000,#0a0a1e,#000);
+  border-top:1px solid rgba(247,201,72,.2);border-bottom:1px solid rgba(247,201,72,.2);
+  overflow:hidden;padding:10px 0;
+}
+.ticker{display:flex;gap:0;animation:ticker 25s linear infinite;white-space:nowrap;}
+.ticker-item{
+  font-family:var(--font-pixel);font-size:7px;padding:0 30px;
+  color:var(--gold);letter-spacing:1px;
+}
+.ticker-item span{color:var(--green);}
+.ticker-item .dn{color:var(--red);}
+
+/* ── SECTIONS ── */
+section{padding:100px 20px;}
+.container{max-width:1100px;margin:0 auto;}
+.section-tag{
+  font-family:var(--font-pixel);font-size:7px;color:var(--orange);
+  letter-spacing:2px;margin-bottom:14px;display:block;
+}
+.section-title{
+  font-family:var(--font-pixel);font-size:clamp(18px,4vw,36px);
+  line-height:1.5;margin-bottom:20px;
+  background:linear-gradient(135deg,#fff,var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.section-desc{color:#888;font-size:14px;line-height:1.9;max-width:600px;}
+
+/* ── ABOUT ── */
+#about{background:linear-gradient(180deg,var(--dark),var(--panel));}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.about-pixel-art{
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.char-canvas-wrap{
+  background:linear-gradient(135deg,#0a0a1e,#160830);
+  border:2px solid var(--gold);padding:30px;
+  box-shadow:0 0 60px #f7c94822,inset 0 0 40px rgba(0,0,0,.5);
+  position:relative;
+}
+.char-canvas-wrap::before{
+  content:'SUPER SOLARIO';font-family:var(--font-pixel);font-size:6px;
+  color:var(--gold);position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--dark);padding:0 8px;letter-spacing:2px;
+}
+#charCanvas{display:block;}
+.about-points{display:flex;flex-direction:column;gap:20px;margin-top:30px;}
+.about-point{display:flex;gap:14px;align-items:flex-start;}
+.ap-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.ap-text h4{font-family:var(--font-pixel);font-size:8px;color:var(--gold);margin-bottom:6px;}
+.ap-text p{font-size:12px;color:#888;line-height:1.7;}
+
+/* ── TOKENOMICS ── */
+#tokenomics{background:var(--panel);}
+.token-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-top:50px;}
+.token-card{
+  background:linear-gradient(135deg,rgba(247,201,72,.05),rgba(255,107,0,.03));
+  border:1px solid rgba(247,201,72,.15);
+  padding:28px 24px;position:relative;overflow:hidden;
+  transition:all .25s;
+}
+.token-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(247,201,72,.08),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.token-card:hover::before{opacity:1;}
+.token-card:hover{border-color:rgba(247,201,72,.4);transform:translateY(-4px);box-shadow:0 12px 30px rgba(247,201,72,.1);}
+.tc-pct{
+  font-family:var(--font-pixel);font-size:clamp(20px,3vw,30px);
+  color:var(--gold);margin-bottom:8px;
+  text-shadow:0 0 20px #f7c94844;
+}
+.tc-label{font-family:var(--font-pixel);font-size:7px;color:#aaa;margin-bottom:10px;letter-spacing:1px;}
+.tc-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+.tc-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--orange));transition:width 1.5s ease;}
+.tc-desc{font-size:11px;color:#666;margin-top:10px;line-height:1.6;}
+
+.token-stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;margin-top:40px;
+}
+.stat-box{
+  background:rgba(0,255,157,.04);border:1px solid rgba(0,255,157,.15);
+  padding:20px;text-align:center;
+}
+.stat-val{font-family:var(--font-pixel);font-size:14px;color:var(--green);margin-bottom:6px;}
+.stat-label{font-family:var(--font-pixel);font-size:6px;color:#666;letter-spacing:1px;}
+
+/* ── ROADMAP ── */
+#roadmap{background:linear-gradient(180deg,var(--panel),var(--dark));}
+.roadmap-line{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:0;position:relative;margin-top:60px;
+}
+.roadmap-line::before{
+  content:'';position:absolute;top:24px;left:5%;right:5%;height:2px;
+  background:linear-gradient(90deg,var(--dark),var(--gold),var(--dark));z-index:0;
+}
+.rm-phase{padding:0 20px;position:relative;z-index:1;}
+.rm-dot{
+  width:16px;height:16px;border-radius:50%;margin-bottom:20px;
+  border:3px solid var(--gold);background:var(--dark);
+  box-shadow:0 0 12px var(--gold);position:relative;
+}
+.rm-dot.done{background:var(--gold);}
+.rm-dot.active{background:var(--gold);animation:dotPulse 1.5s infinite;}
+.rm-phase h4{font-family:var(--font-pixel);font-size:8px;color:var(--gold);margin-bottom:12px;}
+.rm-phase p{font-family:var(--font-pixel);font-size:5px;color:#888;line-height:2.2;letter-spacing:1px;}
+.rm-phase p span{color:var(--green);}
+.rm-badge{
+  display:inline-block;margin-top:10px;
+  font-family:var(--font-pixel);font-size:5px;padding:4px 8px;
+  background:rgba(0,255,157,.1);border:1px solid var(--green);color:var(--green);letter-spacing:1px;
+}
+.rm-badge.pending{background:rgba(247,201,72,.08);border-color:rgba(247,201,72,.4);color:var(--gold);}
+
+/* ── GAME SECTION ── */
+#game-section{background:var(--deep);padding:80px 20px;}
+.game-wrap{
+  max-width:860px;margin:0 auto;
+  background:linear-gradient(135deg,#060612,#0f0520);
+  border:2px solid var(--gold);
+  box-shadow:0 0 60px rgba(247,201,72,.15),inset 0 0 40px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+.game-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(247,201,72,.2);
+}
+.gh-title{font-family:var(--font-pixel);font-size:9px;color:var(--gold);}
+.gh-dots{display:flex;gap:6px;}
+.gh-dot{width:10px;height:10px;border-radius:50%;}
+.game-frame-note{
+  padding:20px;font-family:var(--font-pixel);font-size:8px;color:#666;text-align:center;
+  line-height:2;
+}
+.game-frame-note a{color:var(--gold);text-decoration:none;}
+.game-frame-note a:hover{text-decoration:underline;}
+
+/* ── COMMUNITY ── */
+#community{background:linear-gradient(180deg,var(--dark),var(--panel));}
+.social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-top:50px;}
+.social-card{
+  background:linear-gradient(135deg,rgba(59,130,246,.05),rgba(124,58,237,.03));
+  border:1px solid rgba(59,130,246,.2);
+  padding:28px 24px;text-align:center;transition:all .25s;cursor:pointer;text-decoration:none;
+  display:block;color:inherit;
+}
+.social-card:hover{border-color:rgba(59,130,246,.5);transform:translateY(-4px);box-shadow:0 12px 30px rgba(59,130,246,.12);}
+.sc-icon{font-size:36px;margin-bottom:14px;display:block;}
+.sc-name{font-family:var(--font-pixel);font-size:9px;color:#fff;margin-bottom:8px;}
+.sc-desc{font-size:11px;color:#666;line-height:1.6;}
+
+/* ── MEMES ── */
+#memes{background:var(--panel);}
+.meme-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:16px;margin-top:40px;
+}
+.meme-card{
+  background:var(--dark);border:1px solid rgba(247,201,72,.1);
+  overflow:hidden;transition:all .25s;
+}
+.meme-card:hover{border-color:var(--gold);transform:scale(1.02);box-shadow:0 8px 30px rgba(247,201,72,.15);}
+.meme-visual{
+  height:200px;display:flex;align-items:center;justify-content:center;
+  font-size:80px;position:relative;overflow:hidden;
+}
+.meme-caption{
+  padding:14px 16px;font-family:var(--font-pixel);font-size:6px;
+  color:var(--gold);letter-spacing:1px;line-height:1.8;
+}
+.meme-sub{font-family:var(--font-mono);font-size:10px;color:#555;margin-top:4px;}
+
+/* ── FAQ ── */
+#faq{background:var(--dark);}
+.faq-list{margin-top:50px;max-width:700px;}
+.faq-item{border-bottom:1px solid rgba(247,201,72,.1);overflow:hidden;}
+.faq-q{
+  padding:20px 0;font-family:var(--font-pixel);font-size:8px;color:var(--gold);
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+  letter-spacing:1px;user-select:none;
+}
+.faq-q .arrow{transition:transform .3s;color:#555;font-size:10px;}
+.faq-item.open .faq-q .arrow{transform:rotate(180deg);color:var(--gold);}
+.faq-a{
+  max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;
+  font-size:12px;color:#888;line-height:1.8;
+}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:16px;}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--deep);border-top:1px solid rgba(247,201,72,.15);
+  padding:50px 20px 30px;
+}
+.footer-top{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:40px;max-width:1100px;margin:0 auto 40px;
+}
+.footer-brand .logo{font-family:var(--font-pixel);font-size:14px;color:var(--gold);margin-bottom:12px;}
+.footer-brand p{font-size:12px;color:#555;line-height:1.7;max-width:260px;}
+.footer-col h5{font-family:var(--font-pixel);font-size:7px;color:var(--gold);margin-bottom:16px;letter-spacing:1px;}
+.footer-col a{display:block;font-size:11px;color:#555;text-decoration:none;margin-bottom:8px;transition:color .2s;}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{
+  max-width:1100px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  padding-top:24px;border-top:1px solid rgba(255,255,255,.05);
+}
+.footer-bottom p{font-size:10px;color:#333;}
+.disclaimer{font-size:9px;color:#333;max-width:1100px;margin:20px auto 0;line-height:1.7;text-align:center;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeSlide{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-8px);}}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 8px var(--gold);}50%{box-shadow:0 0 24px var(--gold),0 0 40px var(--gold);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:12px 20px;}
+  .nav-links,.nav-cta{display:none;}
+  #hamburger{display:flex;}
+  .about-grid{grid-template-columns:1fr;}
+  .roadmap-line::before{display:none;}
+  .footer-top{grid-template-columns:1fr 1fr;}
+  .footer-brand{grid-column:span 2;}
+}
+@media(max-width:480px){
+  section{padding:70px 16px;}
+  .footer-top{grid-template-columns:1fr;}
+  .footer-brand{grid-column:span 1;}
+  .hero-btns{flex-direction:column;align-items:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">🌙 $SOLARIO</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#tokenomics">Tokenomics</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#game-section">Play</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="#" class="nav-cta">BUY $SOLARIO</a>
+  <div id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- Mobile menu -->
+<div id="mobile-menu">
+  <a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#tokenomics" onclick="toggleMenu()">Tokenomics</a>
+  <a href="#roadmap" onclick="toggleMenu()">Roadmap</a>
+  <a href="#game-section" onclick="toggleMenu()">Play</a>
+  <a href="#community" onclick="toggleMenu()">Community</a>
+  <a href="#faq" onclick="toggleMenu()">FAQ</a>
+  <a href="#" class="btn-primary" style="margin-top:10px" onclick="toggleMenu()">BUY $SOLARIO</a>
+</div>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-tag">🚀 THE NEXT 1000X GEM</div>
+    <h1 class="hero-title">TO THE MOON<br>WITH $SOLARIO</h1>
+    <p class="hero-sub">
+      The <span>first playable meme coin</span> — earn $SOLARIO while you game.<br>
+      Community-driven. Diamond hands only. No rugs. Only moon. 🌙
+    </p>
+    <div class="hero-btns">
+      <a href="#" class="btn-primary">🚀 BUY $SOLARIO NOW</a>
+      <a href="#game-section" class="btn-outline">🎮 PLAY THE GAME</a>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL DOWN</div>
+</section>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <span class="ticker-item">$SOLARIO <span>+420.69%</span> 🌙</span>
+    <span class="ticker-item">HOLDERS: <span>10,000+</span> 💎</span>
+    <span class="ticker-item">MARKET CAP: <span>$6.9M</span> 🚀</span>
+    <span class="ticker-item">BEARS ARE: <span class="dn">REKT</span> ❌</span>
+    <span class="ticker-item">SUPPLY: <span>1B $SOLARIO</span> 🌕</span>
+    <span class="ticker-item">LISTING: <span>RAYDIUM</span> ✅</span>
+    <span class="ticker-item">GAME V1: <span>LIVE</span> 🎮</span>
+    <span class="ticker-item">NEXT MOON: <span>SOON™</span> ⭐</span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">$SOLARIO <span>+420.69%</span> 🌙</span>
+    <span class="ticker-item">HOLDERS: <span>10,000+</span> 💎</span>
+    <span class="ticker-item">MARKET CAP: <span>$6.9M</span> 🚀</span>
+    <span class="ticker-item">BEARS ARE: <span class="dn">REKT</span> ❌</span>
+    <span class="ticker-item">SUPPLY: <span>1B $SOLARIO</span> 🌕</span>
+    <span class="ticker-item">LISTING: <span>RAYDIUM</span> ✅</span>
+    <span class="ticker-item">GAME V1: <span>LIVE</span> 🎮</span>
+    <span class="ticker-item">NEXT MOON: <span>SOON™</span> ⭐</span>
+  </div>
+</div>
+
+<!-- ── ABOUT ── -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="reveal">
+        <span class="section-tag">// WHAT IS $SOLARIO</span>
+        <h2 class="section-title">THE MEME COIN<br>THAT PLAYS BACK</h2>
+        <p class="section-desc">
+          $SOLARIO isn't just another dog coin. It's a full-on gaming universe on the Solana blockchain — 
+          where your bags moon AND you can stomp virtual bears on your way there.
+        </p>
+        <div class="about-points">
+          <div class="about-point">
+            <span class="ap-icon">🎮</span>
+            <div class="ap-text">
+              <h4>PLAY-TO-EARN (SOON)</h4>
+              <p>Super Solario Bros is live. P2E staking rewards are next. Hold $SOLARIO, earn more.</p>
+            </div>
+          </div>
+          <div class="about-point">
+            <span class="ap-icon">💎</span>
+            <div class="ap-text">
+              <h4>DIAMOND HANDS TREASURY</h4>
+              <p>5% of every transaction goes into the Diamond Hands Treasury, funding buybacks and burns.</p>
+            </div>
+          </div>
+          <div class="about-point">
+            <span class="ap-icon">🌙</span>
+            <div class="ap-text">
+              <h4>COMMUNITY GOVERNED</h4>
+              <p>Every major decision is voted on by token holders. Your bags, your voice.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:.15s">
+        <div class="about-pixel-art">
+          <div class="char-canvas-wrap">
+            <canvas id="charCanvas" width="180" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TOKENOMICS ── -->
+<section id="tokenomics">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="section-tag">// TOKENOMICS</span>
+      <h2 class="section-title">1,000,000,000 $SOLARIO</h2>
+      <p class="section-desc" style="margin:0 auto">Transparent. Fair. No VC bags. No insider allocations. Just the community and the moon.</p>
+    </div>
+    <div class="token-grid reveal">
+      <div class="token-card">
+        <div class="tc-pct">40%</div>
+        <div class="tc-label">PUBLIC SALE</div>
+        <div class="tc-bar"><div class="tc-bar-fill" style="width:0" data-width="40%"></div></div>
+        <div class="tc-desc">Fair launch on Raydium. No presale. First come, first moon.</div>
+      </div>
+      <div class="token-card">
+        <div class="tc-pct">20%</div>
+        <div class="tc-label">LIQUIDITY POOL</div>
+        <div class="tc-bar"><div class="tc-bar-fill" style="width:0" data-width="20%"></div></div>
+        <div class="tc-desc">Locked for 2 years. Rug-proof. Diamond hands LP.</div>
+      </div>
+      <div class="token-card">
+        <div class="tc-pct">15%</div>
+        <div class="tc-label">GAMING REWARDS</div>
+        <div class="tc-bar"><div class="tc-bar-fill" style="width:0" data-width="15%"></div></div>
+        <div class="tc-desc">Distributed to top players and P2E participants over 3 years.</div>
+      </div>
+      <div class="token-card">
+        <div class="tc-pct">15%</div>
+        <div class="tc-label">TREASURY</div>
+        <div class="tc-bar"><div class="tc-bar-fill" style="width:0" data-width="15%"></div></div>
+        <div class="tc-desc">CEX listings, partnerships, and ecosystem growth. Multisig.</div>
+      </div>
+      <div class="token-card">
+        <div class="tc-pct">10%</div>
+        <div class="tc-label">TEAM</div>
+        <div class="tc-bar"><div class="tc-bar-fill" style="width:0" data-width="10%"></div></div>
+        <div class="tc-desc">18-month vesting, 6-month cliff. Team is as locked in as the LP.</div>
+      </div>
+    </div>
+    <div class="token-stats reveal">
+      <div class="stat-box"><div class="stat-val">1B</div><div class="stat-label">TOTAL SUPPLY</div></div>
+      <div class="stat-box"><div class="stat-val">5%</div><div class="stat-label">BUY/SELL TAX</div></div>
+      <div class="stat-box"><div class="stat-val">2YR</div><div class="stat-label">LP LOCKED</div></div>
+      <div class="stat-box"><div class="stat-val">🔒</div><div class="stat-label">CONTRACT RENOUNCED</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROADMAP ── -->
+<section id="roadmap">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="section-tag">// ROADMAP</span>
+      <h2 class="section-title">THE MOON MAP</h2>
+      <p class="section-desc" style="margin:0 auto">Every step is a stomp. Every phase is a level. We're collecting coins and crushing bears all the way up.</p>
+    </div>
+    <div class="roadmap-line reveal">
+      <div class="rm-phase">
+        <div class="rm-dot done"></div>
+        <h4>PHASE 1<br>LAUNCH</h4>
+        <p>
+          <span>✓</span> Token deployed<br>
+          <span>✓</span> Website live<br>
+          <span>✓</span> Game v1 released<br>
+          <span>✓</span> Raydium listing<br>
+          <span>✓</span> 1,000 holders
+        </p>
+        <span class="rm-badge">COMPLETE</span>
+      </div>
+      <div class="rm-phase">
+        <div class="rm-dot active"></div>
+        <h4>PHASE 2<br>GROW</h4>
+        <p>
+          <span>✓</span> CoinGecko listing<br>
+          <span>✓</span> CMC listing<br>
+          ◻ 10,000 holders<br>
+          ◻ KOL partnerships<br>
+          ◻ Game v2 (more levels)
+        </p>
+        <span class="rm-badge active">IN PROGRESS</span>
+      </div>
+      <div class="rm-phase">
+        <div class="rm-dot"></div>
+        <h4>PHASE 3<br>BUILD</h4>
+        <p>
+          ◻ P2E staking launch<br>
+          ◻ Leaderboard rewards<br>
+          ◻ NFT characters<br>
+          ◻ 50,000 holders<br>
+          ◻ Tier-2 CEX listing
+        </p>
+        <span class="rm-badge pending">COMING SOON</span>
+      </div>
+      <div class="rm-phase">
+        <div class="rm-dot"></div>
+        <h4>PHASE 4<br>MOON</h4>
+        <p>
+          ◻ Major CEX listing<br>
+          ◻ Solario mobile app<br>
+          ◻ DAO governance<br>
+          ◻ 100,000 holders<br>
+          ◻ 🌙🚀🌕
+        </p>
+        <span class="rm-badge pending">TO THE MOON</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── GAME ── -->
+<section id="game-section">
+  <div class="container" style="text-align:center">
+    <div class="reveal">
+      <span class="section-tag">// PLAY NOW</span>
+      <h2 class="section-title">SUPER SOLARIO BROS</h2>
+      <p class="section-desc" style="margin:0 auto 30px">
+        4 full levels. Real gameplay. Stomp bears, collect $SOLARIO coins, go moon mode. 
+        The more you play, the more you believe.
+      </p>
+    </div>
+    <div class="game-wrap reveal">
+      <div class="game-header">
+        <span class="gh-title">🎮 SUPER SOLARIO BROS v1.0</span>
+        <div class="gh-dots">
+          <div class="gh-dot" style="background:#ef4444"></div>
+          <div class="gh-dot" style="background:#f59e0b"></div>
+          <div class="gh-dot" style="background:#22c55e"></div>
+        </div>
+      </div>
+      <div class="game-frame-note">
+        🕹️ The game is a standalone HTML file — 
+        <a href="super-solario-game.html" target="_blank">CLICK HERE TO PLAY IN FULL SCREEN</a>
+        <br><br>
+        To embed on your Google Site: host the game file on 
+        <a href="https://app.netlify.com/drop" target="_blank">Netlify Drop</a> (free, 30 seconds) 
+        then use the Google Sites Embed block with your hosted URL.
+        <br><br>
+        ← → MOVE &nbsp;|&nbsp; SPACE / ↑ JUMP &nbsp;|&nbsp; Stomp BEARS &nbsp;|&nbsp; Collect $SOLARIO COINS
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMMUNITY ── -->
+<section id="community">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="section-tag">// COMMUNITY</span>
+      <h2 class="section-title">JOIN THE ARMY</h2>
+      <p class="section-desc" style="margin:0 auto">10,000+ diamond hands. One mission. To the moon.</p>
+    </div>
+    <div class="social-grid reveal">
+      <a href="#" class="social-card">
+        <span class="sc-icon">🐦</span>
+        <div class="sc-name">TWITTER / X</div>
+        <div class="sc-desc">Latest alpha, memes, and moon calls. Follow for daily $SOLARIO updates.</div>
+      </a>
+      <a href="#" class="social-card">
+        <span class="sc-icon">💬</span>
+        <div class="sc-name">TELEGRAM</div>
+        <div class="sc-desc">Join 10,000+ holders in the main chat. No FUD allowed. Bears get rekt.</div>
+      </a>
+      <a href="#" class="social-card">
+        <span class="sc-icon">🎮</span>
+        <div class="sc-name">DISCORD</div>
+        <div class="sc-desc">Game leaderboards, governance voting, and the inner circle diamond lounge.</div>
+      </a>
+      <a href="#" class="social-card">
+        <span class="sc-icon">📱</span>
+        <div class="sc-name">REDDIT</div>
+        <div class="sc-desc">r/SolarioCoin — memes, DD, and the loudest community in crypto.</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── MEMES ── -->
+<section id="memes">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="section-tag">// MEME GALLERY</span>
+      <h2 class="section-title">THE BEST MEMES<br>IN THE GAME</h2>
+    </div>
+    <div class="meme-grid reveal">
+      <div class="meme-card">
+        <div class="meme-visual" style="background:linear-gradient(135deg,#0f0530,#2a1060)">
+          <canvas class="meme-canvas" width="240" height="200" data-meme="0"></canvas>
+        </div>
+        <div class="meme-caption">WHEN $SOLARIO HITS $1<br><div class="meme-sub">it's not if, it's when</div></div>
+      </div>
+      <div class="meme-card">
+        <div class="meme-visual" style="background:linear-gradient(135deg,#001422,#002a3a)">
+          <canvas class="meme-canvas" width="240" height="200" data-meme="1"></canvas>
+        </div>
+        <div class="meme-caption">BEARS GETTING STOMPED<br><div class="meme-sub">rekt in minecraft</div></div>
+      </div>
+      <div class="meme-card">
+        <div class="meme-visual" style="background:linear-gradient(135deg,#000,#0a0a20)">
+          <canvas class="meme-canvas" width="240" height="200" data-meme="2"></canvas>
+        </div>
+        <div class="meme-caption">MOON MODE ACTIVATED<br><div class="meme-sub">infinite gains unlocked</div></div>
+      </div>
+      <div class="meme-card">
+        <div class="meme-visual" style="background:linear-gradient(135deg,#160200,#3d0a00)">
+          <canvas class="meme-canvas" width="240" height="200" data-meme="3"></canvas>
+        </div>
+        <div class="meme-caption">DIAMOND HANDS ONLY<br><div class="meme-sub">never selling. ever.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section id="faq">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-tag">// FAQ</span>
+      <h2 class="section-title">GOT QUESTIONS?<br>WE GOT ANSWERS.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">IS THIS A RUG PULL? <span class="arrow">▼</span></div>
+        <div class="faq-a">Absolutely not. The liquidity pool is locked for 2 years, the contract is renounced, and the team tokens are vested with a 6-month cliff. We're here for the long haul. Diamond hands only.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">HOW DO I BUY $SOLARIO? <span class="arrow">▼</span></div>
+        <div class="faq-a">Get a Phantom or Solflare wallet → fund it with SOL → go to Raydium or Jupiter → swap SOL for $SOLARIO using our contract address. Always verify the CA on our official website and socials.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">WHEN P2E? <span class="arrow">▼</span></div>
+        <div class="faq-a">Play-to-earn mechanics are Phase 3 on the roadmap. Top leaderboard scores will earn $SOLARIO rewards distributed from the Gaming Rewards treasury allocation. Stay tuned.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">WHAT IS THE TAX? <span class="arrow">▼</span></div>
+        <div class="faq-a">5% on buys and sells. 2% goes to the Diamond Hands Treasury for buybacks and burns. 2% to the development fund. 1% auto-liquidity. Fair and transparent.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">WHY SHOULD I HOLD? <span class="arrow">▼</span></div>
+        <div class="faq-a">Strong community, a real product (the game!), transparent tokenomics, locked LP, and a roadmap that actually makes sense. Plus, have you seen how fun the game is? That's why.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">IS THIS FINANCIAL ADVICE? <span class="arrow">▼</span></div>
+        <div class="faq-a">Absolutely not. $SOLARIO is a meme coin created for entertainment purposes. Crypto is extremely volatile. Never invest more than you can afford to lose. DYOR.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand reveal">
+      <div class="logo">🌙 $SOLARIO</div>
+      <p>The first playable meme coin. To the moon, one stomp at a time. Community-driven. Diamond hands required.</p>
+    </div>
+    <div class="footer-col reveal">
+      <h5>LINKS</h5>
+      <a href="#about">About</a>
+      <a href="#tokenomics">Tokenomics</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#game-section">Play the Game</a>
+    </div>
+    <div class="footer-col reveal">
+      <h5>COMMUNITY</h5>
+      <a href="#">Twitter / X</a>
+      <a href="#">Telegram</a>
+      <a href="#">Discord</a>
+      <a href="#">Reddit</a>
+    </div>
+    <div class="footer-col reveal">
+      <h5>RESOURCES</h5>
+      <a href="#">Whitepaper</a>
+      <a href="#">Audit Report</a>
+      <a href="#">Contract Address</a>
+      <a href="#">Brand Kit</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 $SOLARIO. All rights reserved. To the moon. 🌙</p>
+    <p style="color:#333">Built with 💎 diamond hands</p>
+  </div>
+  <p class="disclaimer">
+    DISCLAIMER: $SOLARIO is a meme coin created purely for entertainment and community purposes. 
+    It has no intrinsic value or financial return expectations. 
+    Cryptocurrency investments are highly speculative and volatile. 
+    This is not financial advice. Always do your own research. Never invest more than you can afford to lose.
+  </p>
+</footer>
+
+<script>
+// ── HERO CANVAS ──────────────────────────────────────────
+const heroCanvas = document.getElementById('hero-canvas');
+const hctx = heroCanvas.getContext('2d');
+let heroStars = [], heroCoins = [], heroBears = [];
+let heroFrame = 0;
+
+function resizeHero(){
+  heroCanvas.width = heroCanvas.offsetWidth;
+  heroCanvas.height = heroCanvas.offsetHeight;
+  heroStars = Array.from({length:180},()=>({
+    x:Math.random()*heroCanvas.width, y:Math.random()*heroCanvas.height,
+    r:Math.random()*1.5+.2, tw:Math.random()*Math.PI*2, spd:Math.random()*.3+.05
+  }));
+}
+resizeHero();
+window.addEventListener('resize', resizeHero);
+
+// Floating coins
+for(let i=0;i<12;i++) heroCoins.push({
+  x:Math.random()*2000, y:Math.random()*600,
+  vy:-0.4-Math.random()*.3, vx:(Math.random()-.5)*.5,
+  a:Math.random()*Math.PI*2, r:8+Math.random()*5, life:Math.random()
+});
+
+function drawHeroStar(s){
+  const tw=.3+.7*Math.sin(heroFrame*.03+s.tw);
+  hctx.globalAlpha=tw*.7; hctx.fillStyle='#fff';
+  hctx.beginPath(); hctx.arc(s.x,s.y,s.r,0,Math.PI*2); hctx.fill();
+}
+
+function drawHeroCoin(c){
+  const scX=Math.abs(Math.cos(c.a*1.2))*.8+.2;
+  hctx.save(); hctx.translate(c.x,c.y); hctx.globalAlpha=c.life*.5;
+  hctx.shadowColor='#ffd700'; hctx.shadowBlur=10;
+  hctx.fillStyle='#ffd700';
+  hctx.beginPath(); hctx.ellipse(0,0,c.r*scX,c.r,0,0,Math.PI*2); hctx.fill();
+  hctx.fillStyle='rgba(255,255,200,.6)';
+  hctx.beginPath(); hctx.ellipse(-c.r*.15*scX,-c.r*.15,c.r*.28*scX,c.r*.25,0,0,Math.PI*2); hctx.fill();
+  hctx.shadowBlur=0; hctx.restore();
+}
+
+function heroLoop(){
+  hctx.clearRect(0,0,heroCanvas.width,heroCanvas.height);
+  heroFrame++;
+  for(const s of heroStars) drawHeroStar(s);
+  for(const c of heroCoins){
+    c.a+=.05; c.x+=c.vx; c.y+=c.vy; c.life=Math.min(1,c.life+.004);
+    if(c.y<-30){ c.y=heroCanvas.height+10; c.x=Math.random()*heroCanvas.width; c.life=0; }
+    drawHeroCoin(c);
+  }
+  hctx.globalAlpha=1;
+  requestAnimationFrame(heroLoop);
+}
+heroLoop();
+
+// ── CHARACTER CANVAS ─────────────────────────────────────
+const charCanvas = document.getElementById('charCanvas');
+const cctx = charCanvas.getContext('2d');
+let cf = 0;
+function drawChar(){
+  cctx.clearRect(0,0,180,220);
+  cf++;
+  const bob = Math.sin(cf*.04)*5;
+  const cx=90, cy=120+bob;
+  const moon = Math.sin(cf*.02)>.7;
+
+  if(moon){ cctx.shadowColor='#ffd700'; cctx.shadowBlur=20+Math.sin(cf*.08)*8; }
+
+  // Shadow
+  cctx.globalAlpha=.2; cctx.fillStyle='#000';
+  cctx.beginPath(); cctx.ellipse(cx,190,20,6,0,0,Math.PI*2); cctx.fill();
+  cctx.globalAlpha=1;
+
+  // Legs
+  const lg=Math.sin(cf*.12)*6;
+  cctx.fillStyle=moon?'#f59e0b':'#1d4ed8';
+  cctx.fillRect(cx-10,cy+12,8,16+lg); cctx.fillRect(cx+2,cy+12,8,16-lg);
+  cctx.fillStyle=moon?'#f59e0b':'#1e1b4b';
+  cctx.fillRect(cx-13,cy+26+lg,11,6); cctx.fillRect(cx+2,cy+26-lg,11,6);
+
+  // Overalls
+  cctx.fillStyle=moon?'#f59e0b':'#1d4ed8';
+  cctx.fillRect(cx-14,cy-2,28,16);
+  // Straps
+  cctx.fillStyle=moon?'#fbbf24':'#1e40af';
+  cctx.fillRect(cx-6,cy-16,4,16); cctx.fillRect(cx+2,cy-16,4,16);
+
+  // Shirt
+  cctx.fillStyle=moon?'#fbbf24':'#dc2626';
+  cctx.fillRect(cx-14,cy-22,28,22);
+
+  // Head
+  cctx.fillStyle='#fbbf24';
+  cctx.beginPath(); cctx.ellipse(cx,cy-30,14,16,0,0,Math.PI*2); cctx.fill();
+
+  // Mustache
+  cctx.fillStyle='#78350f';
+  cctx.fillRect(cx-8,cy-22,16,3);
+  cctx.beginPath(); cctx.arc(cx-4,cy-19,4,0,Math.PI); cctx.fill();
+  cctx.beginPath(); cctx.arc(cx+4,cy-19,4,0,Math.PI); cctx.fill();
+
+  // Eye
+  cctx.fillStyle='#111'; cctx.fillRect(cx+4,cy-33,6,6);
+  cctx.fillStyle='#fff'; cctx.fillRect(cx+6,cy-33,2,2);
+
+  // Hat
+  cctx.fillStyle=moon?'#f59e0b':'#dc2626';
+  cctx.fillRect(cx-15,cy-48,30,10);
+  cctx.fillRect(cx-10,cy-60,20,14);
+  // Hat $ badge
+  cctx.fillStyle=moon?'#000':'rgba(255,255,255,.85)';
+  cctx.font=`bold 8px 'Press Start 2P',monospace`;
+  cctx.textAlign='center'; cctx.fillText('$',cx,cy-50);
+
+  // Coin in hand
+  const coinA = cf*.08;
+  const hx = cx+18+Math.cos(coinA)*4, hy=cy-8+Math.sin(coinA)*3;
+  cctx.shadowColor='#ffd700'; cctx.shadowBlur=8;
+  cctx.fillStyle='#ffd700';
+  cctx.beginPath(); cctx.arc(hx,hy,9,0,Math.PI*2); cctx.fill();
+  cctx.fillStyle='#92400e';
+  cctx.font=`bold 7px 'Press Start 2P',monospace`; cctx.textAlign='center';
+  cctx.fillText('$',hx,hy+2);
+  cctx.shadowBlur=0;
+
+  // Moon mode aura
+  if(moon){
+    cctx.globalAlpha=.15+Math.sin(cf*.1)*.08;
+    cctx.fillStyle='#ffd700';
+    cctx.beginPath(); cctx.ellipse(cx,cy-10,30,50,0,0,Math.PI*2); cctx.fill();
+    cctx.globalAlpha=1;
+  }
+
+  cctx.shadowBlur=0;
+  requestAnimationFrame(drawChar);
+}
+drawChar();
+
+// ── MEME CANVASES ────────────────────────────────────────
+document.querySelectorAll('.meme-canvas').forEach(mc=>{
+  const mctx=mc.getContext('2d');
+  const idx=parseInt(mc.dataset.meme);
+  let mf=0;
+  const memes=[
+    // 0: player flying with coins
+    ()=>{
+      mctx.clearRect(0,0,240,200); mf++;
+      const bob=Math.sin(mf*.05)*8;
+      // Stars bg
+      mctx.fillStyle='rgba(255,255,255,.3)';
+      [[20,30],[60,50],[100,20],[150,40],[200,25],[180,70],[40,80]].forEach(([sx,sy])=>{
+        mctx.beginPath(); mctx.arc(sx,sy+bob*.1,1.5,0,Math.PI*2); mctx.fill();
+      });
+      // Moon
+      mctx.fillStyle='rgba(255,233,160,.25)';
+      mctx.beginPath(); mctx.arc(180,35,30,0,Math.PI*2); mctx.fill();
+      // Coins raining
+      for(let i=0;i<8;i++){
+        const cx2=20+i*28, cy2=40+Math.sin(mf*.07+i)*20;
+        mctx.shadowColor='#ffd700'; mctx.shadowBlur=6;
+        mctx.fillStyle='#ffd700';
+        mctx.beginPath(); mctx.arc(cx2,cy2,6,0,Math.PI*2); mctx.fill();
+      }
+      // Player
+      const px=100,py=120+bob;
+      mctx.shadowBlur=0; mctx.fillStyle='#fbbf24';
+      mctx.beginPath(); mctx.ellipse(px,py-20,11,13,0,0,Math.PI*2); mctx.fill();
+      mctx.fillStyle='#dc2626'; mctx.fillRect(px-11,py-6,22,16);
+      mctx.fillStyle='#1d4ed8'; mctx.fillRect(px-11,py+8,22,12);
+      // Arms up
+      mctx.fillStyle='#dc2626';
+      mctx.fillRect(px-20,py-12,10,6); mctx.fillRect(px+10,py-12,10,6);
+      // Text
+      mctx.fillStyle='#ffd700'; mctx.font=`bold 9px 'Press Start 2P'`;
+      mctx.textAlign='center'; mctx.fillText('WEN MOON??',px,185);
+      mctx.fillStyle='#00ff9d'; mctx.font=`7px 'Press Start 2P'`;
+      mctx.fillText('RIGHT NOW SER',px,197);
+    },
+    // 1: bear getting stomped
+    ()=>{
+      mctx.clearRect(0,0,240,200); mf++;
+      const st=Math.abs(Math.sin(mf*.04));
+      // Bear (flat)
+      mctx.fillStyle='#7f1d1d';
+      mctx.beginPath(); mctx.ellipse(120,140+st*10,40,10+st*5,0,0,Math.PI*2); mctx.fill();
+      mctx.fillStyle='#dc2626';
+      mctx.beginPath(); mctx.ellipse(120,130,35,20*st,0,0,Math.PI*2); mctx.fill();
+      // X eyes
+      if(st<.5){
+        mctx.fillStyle='#fff'; mctx.font=`bold 14px sans-serif`; mctx.textAlign='center';
+        mctx.fillText('X',105,128); mctx.fillText('X',135,128);
+      }
+      mctx.fillStyle='#dc2626'; mctx.font=`10px 'Press Start 2P'`;
+      mctx.textAlign='center'; mctx.fillText('BEAR',120,148+st*8);
+      // Player foot
+      const py=90-st*20;
+      mctx.fillStyle='#fbbf24';
+      mctx.beginPath(); mctx.ellipse(120,py-20,11,13,0,0,Math.PI*2); mctx.fill();
+      mctx.fillStyle='#dc2626'; mctx.fillRect(109,py-6,22,12);
+      mctx.fillStyle='#1e1b4b'; mctx.fillRect(107,py+4,24,8);
+      // Particles
+      for(let i=0;i<6;i++){
+        const a=i/6*Math.PI*2, px2=120+Math.cos(a)*30*(1-st), py2=140+Math.sin(a)*20*(1-st);
+        mctx.fillStyle='#ff6b00'; mctx.beginPath(); mctx.arc(px2,py2,3,0,Math.PI*2); mctx.fill();
+      }
+      mctx.fillStyle='#00ff9d'; mctx.font=`bold 10px 'Press Start 2P'`;
+      mctx.textAlign='center'; mctx.fillText('REKT +200',120,185);
+    },
+    // 2: star/moon mode
+    ()=>{
+      mctx.clearRect(0,0,240,200); mf++;
+      const glow=.6+Math.sin(mf*.06)*.4;
+      // Aura
+      const grad=mctx.createRadialGradient(120,100,10,120,100,80);
+      grad.addColorStop(0,`rgba(255,215,0,${glow*.4})`);
+      grad.addColorStop(1,'transparent');
+      mctx.fillStyle=grad; mctx.fillRect(0,0,240,200);
+      // Star particles
+      for(let i=0;i<10;i++){
+        const a=i/10*Math.PI*2+mf*.02;
+        const r=50+Math.sin(mf*.05+i)*10;
+        const sx=120+Math.cos(a)*r, sy=100+Math.sin(a)*r;
+        mctx.fillStyle='#ffd700'; mctx.globalAlpha=.6+Math.sin(mf*.1+i)*.3;
+        mctx.beginPath(); mctx.arc(sx,sy,3,0,Math.PI*2); mctx.fill();
+      }
+      mctx.globalAlpha=1;
+      // Player in moon mode
+      const py=90;
+      mctx.shadowColor='#ffd700'; mctx.shadowBlur=20*glow;
+      mctx.fillStyle='#fbbf24';
+      mctx.beginPath(); mctx.ellipse(120,py-20,12,14,0,0,Math.PI*2); mctx.fill();
+      mctx.fillStyle='#f59e0b'; mctx.fillRect(108,py-6,24,14);
+      mctx.fillStyle='#f59e0b'; mctx.fillRect(108,py+6,24,10);
+      // Hat
+      mctx.fillStyle='#f59e0b'; mctx.fillRect(108,py-34,24,10); mctx.fillRect(113,py-46,14,14);
+      mctx.shadowBlur=0;
+      mctx.fillStyle='#ffd700'; mctx.font=`bold 10px 'Press Start 2P'`;
+      mctx.textAlign='center'; mctx.fillText('MOON MODE!',120,170);
+      mctx.fillStyle='#fff'; mctx.font=`7px 'Press Start 2P'`;
+      mctx.fillText('INVINCIBLE',120,185);
+    },
+    // 3: diamond hands holding chart
+    ()=>{
+      mctx.clearRect(0,0,240,200); mf++;
+      // Chart
+      const chartPts=[[10,160],[30,155],[50,148],[60,158],[80,140],[100,120],[110,130],[130,100],[150,70],[170,40],[200,20]];
+      mctx.strokeStyle='#00ff9d'; mctx.lineWidth=2;
+      mctx.shadowColor='#00ff9d'; mctx.shadowBlur=6;
+      mctx.beginPath();
+      chartPts.forEach(([cx2,cy2],i)=> i===0?mctx.moveTo(cx2,cy2):mctx.lineTo(cx2,cy2));
+      mctx.stroke();
+      // Fill under line
+      mctx.shadowBlur=0;
+      mctx.beginPath();
+      chartPts.forEach(([cx2,cy2],i)=> i===0?mctx.moveTo(cx2,cy2):mctx.lineTo(cx2,cy2));
+      mctx.lineTo(200,170); mctx.lineTo(10,170); mctx.closePath();
+      mctx.fillStyle='rgba(0,255,157,.07)'; mctx.fill();
+      // Candle at end
+      const pulse=Math.sin(mf*.08);
+      mctx.fillStyle='#22c55e'; mctx.fillRect(205,20+pulse*3,10,20);
+      // Hands emoji
+      mctx.font='28px sans-serif'; mctx.textAlign='center';
+      mctx.fillText('💎',40,190); mctx.fillText('🙌',100,190); mctx.fillText('💎',170,190);
+      // Text
+      mctx.fillStyle='#ffd700'; mctx.font=`bold 8px 'Press Start 2P'`;
+      mctx.fillText('NEVER SELLING',120,12);
+    }
+  ];
+  (function loop(){ memes[idx](); requestAnimationFrame(loop); })();
+});
+
+// ── SCROLL REVEAL ────────────────────────────────────────
+const revObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+// ── BAR ANIMATIONS ───────────────────────────────────────
+const barObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.tc-bar-fill').forEach(bar=>{
+        bar.style.width=bar.dataset.width;
+      });
+    }
+  });
+},{threshold:.2});
+document.querySelectorAll('#tokenomics').forEach(el=>barObs.observe(el));
+
+// ── FAQ ───────────────────────────────────────────────────
+function toggleFAQ(el){
+  const item=el.parentElement;
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen) item.classList.add('open');
+}
+
+// ── MOBILE MENU ───────────────────────────────────────────
+function toggleMenu(){
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+</script>
+</body>
+</html>
