@@ -1129,6 +1129,10 @@ function showEnd(type){
 
 // ─── START IDLE RENDER ────────────────────────────────────
 document.getElementById('sb').onclick=startGame;
+document.addEventListener('keydown',e=>{
+  if(GS!=='idle') return;
+  if(e.code==='Enter'||e.code==='Space'){ e.preventDefault(); startGame(); }
+});
 
 // Animated title screen background
 (function idleLoop(t){
