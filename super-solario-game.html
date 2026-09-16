@@ -91,7 +91,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
         Stomp <b style="color:#ef4444">BEARS</b> · Grab <b>$COINS</b> · Reach the 🚀 flag
       </div>
       <button class="btn" id="sb">🚀 LAUNCH TO THE MOON</button>
-      <div class="hint">PRESS ENTER OR SPACE</div>
+      <div class="hint">ENTER / SPACE TO START · P TO PAUSE</div>
     </div>
     <div id="msg"></div>
   </div>
@@ -201,11 +201,13 @@ let msgT=0;
 function msg(t){const e=document.getElementById('msg');e.textContent=t;e.style.opacity='1';msgT=140;}
 
 // ─── GAME STATE ───────────────────────────────────────────
-let GS='idle'; // idle|play|dead|lc|over
+let GS='idle'; // idle|play|dead|lc|over|pause|pole
 let RAF=null,lastMs=0,FC=0;
 let WLD=null,PL=null;
 let parts=[],ftxts=[];
-let camX=0,shX=0,shY=0,shTm=0;
+let camX=0,camY=0,shX=0,shY=0,shTm=0;
+let combo=0,comboT=0,ckpt={x:2*32,y:0,set:false};
+let poleT=0;
 function shake(m,f){shTm=f;shX=(Math.random()-.5)*m*2;shY=(Math.random()-.5)*m*2;}
 
 // ─── PARTICLES ────────────────────────────────────────────
@@ -292,29 +294,30 @@ function buildLevel(n){
 
   const layouts=[
     // ── LEVEL 1: MOON DISTRICT ────────────────────────────
-    // Tutorial feel – wide platforms, no gaps, lots of coins
+    // Tutorial: coins, one pit, one reward shelf, light enemies
     {
       worldW:70,
-      gaps:[],
+      gaps:[33,34],
+      checkpoints:[36],
       plats:[
         {x:5,y:gr-3,w:4},{x:10,y:gr-4,w:3},{x:15,y:gr-3,w:5},
         {x:22,y:gr-5,w:3},{x:26,y:gr-3,w:4},{x:31,y:gr-4,w:3},
-        {x:36,y:gr-3,w:5},{x:42,y:gr-5,w:4},{x:47,y:gr-3,w:3},
-        {x:52,y:gr-4,w:4},{x:57,y:gr-3,w:4},{x:62,y:gr-5,w:3},
+        {x:32,y:gr-6,w:4},{x:36,y:gr-3,w:5},{x:42,y:gr-5,w:4},
+        {x:47,y:gr-3,w:3},{x:52,y:gr-4,w:4},{x:57,y:gr-3,w:4},{x:62,y:gr-6,w:3},
       ],
       qBlocks:[
         {x:7,y:gr-6,ct:'coin'},{x:12,y:gr-7,ct:'shroom'},{x:17,y:gr-6,ct:'coin'},
-        {x:24,y:gr-8,ct:'star'},{x:29,y:gr-6,ct:'coin'},{x:38,y:gr-6,ct:'shroom'},
+        {x:24,y:gr-8,ct:'coin'},{x:29,y:gr-6,ct:'coin'},{x:38,y:gr-6,ct:'shroom'},
         {x:44,y:gr-8,ct:'coin'},{x:49,y:gr-6,ct:'coin'},{x:54,y:gr-7,ct:'star'},
         {x:59,y:gr-6,ct:'coin'},
       ],
       enemies:[
-        {x:22,fly:false},{x:38,fly:false},{x:52,fly:false},{x:64,fly:false},
+        {x:24,fly:false},{x:42,fly:false},{x:56,fly:false},{x:64,fly:false},
       ],
       coinRows:[
         {x:5,y:gr-4,n:4},{x:10,y:gr-5,n:3},{x:15,y:gr-4,n:5},
-        {x:22,y:gr-6,n:3},{x:36,y:gr-4,n:5},{x:42,y:gr-6,n:4},
-        {x:52,y:gr-5,n:4},{x:57,y:gr-4,n:4},
+        {x:22,y:gr-6,n:3},{x:32,y:gr-7,n:4},{x:36,y:gr-4,n:5},
+        {x:42,y:gr-6,n:4},{x:52,y:gr-5,n:4},{x:62,y:gr-7,n:3},
       ]
     },
     // ── LEVEL 2: CRYPTO CITY ──────────────────────────────
@@ -322,6 +325,8 @@ function buildLevel(n){
     {
       worldW:80,
       gaps:[12,13,22,23,35,36,50,51,63,64],
+      checkpoints:[28,55],
+      loosePU:[[25,gr-5,'shroom'],[56,gr-8,'star']],
       plats:[
         {x:5,y:gr-4,w:4},{x:10,y:gr-5,w:3},{x:15,y:gr-4,w:4},
         {x:18,y:gr-7,w:3},{x:25,y:gr-4,w:5},{x:30,y:gr-6,w:3},
@@ -351,6 +356,8 @@ function buildLevel(n){
     {
       worldW:90,
       gaps:[10,11,12,20,21,30,31,32,42,43,55,56,67,68,69],
+      checkpoints:[28,58],
+      loosePU:[[23,gr-5,'shroom'],[71,gr-6,'star']],
       plats:[
         {x:4,y:gr-4,w:4},{x:7,y:gr-7,w:3},{x:14,y:gr-5,w:4},
         {x:17,y:gr-8,w:3,mov:true,mspd:1.2},{x:23,y:gr-4,w:4},
@@ -407,12 +414,12 @@ function buildLevel(n){
         {x:77,y:gr-12,ct:'coin'},{x:85,y:gr-8,ct:'coin'},{x:89,y:gr-11,ct:'shroom'},
         {x:93,y:gr-8,ct:'star'},{x:96,y:gr-11,ct:'coin'},
       ],
+      checkpoints:[30,62],
+      loosePU:[[28,gr-6,'shroom'],[73,gr-6,'star']],
       enemies:[
-        {x:5,fly:false},{x:11,fly:true},{x:19,fly:false},{x:22,fly:true},
-        {x:28,fly:false},{x:33,fly:true},{x:39,fly:false},{x:44,fly:true},
-        {x:49,fly:false},{x:55,fly:true},{x:61,fly:false},{x:66,fly:true},
-        {x:73,fly:false},{x:79,fly:true},{x:84,fly:false},{x:88,fly:true},
-        {x:92,fly:false},{x:96,fly:false},
+        {x:11,fly:true},{x:19,fly:false},{x:28,fly:false},{x:33,fly:true},
+        {x:39,fly:false},{x:49,fly:false},{x:55,fly:true},{x:61,fly:false},
+        {x:73,fly:false},{x:79,fly:true},{x:88,fly:true},{x:96,fly:false},
       ],
       coinRows:[
         {x:3,y:gr-5,n:3},{x:11,y:gr-6,n:4},{x:19,y:gr-5,n:4},
@@ -435,17 +442,20 @@ function buildLevel(n){
   const gapSet=new Set(layout.gaps);
   for(let x=0;x<WW;x++){
     if(!gapSet.has(x)){
-      plats.push({x:x*T,y:GY,w:T,h:CH()-GY,gt:true,tp:'ground'});
+      plats.push({x:x*T,y:GY,w:T,h:CH()-GY+240,gt:true,tp:'ground'});
     }
   }
 
-  // Floating platforms
+  // Floating platforms (deterministic motion for learnable timing)
   for(const p of layout.plats){
     const px=p.x*T, py=p.y*T, pw=p.w*T;
     const mov=!!p.mov;
+    const seed=(p.x*17+p.y*31+n*7)|0;
+    const mr=mov?(p.mr||(48+(seed%35))):0;
+    const ms=mov?(p.mspd||1)*((seed&1)?1:-1):0;
+    const mt=mov?(seed%90):0;
     plats.push({x:px,y:py,w:pw,h:T,gt:false,tp:'brick',
-      mov,mx:px,mr:mov?50+Math.random()*40:0,
-      ms:mov?(p.mspd||1)*(Math.random()<.5?1:-1):0,mt:Math.random()*100});
+      mov,mx:px,mr,ms,mt,dx:0});
   }
 
   // Question blocks
@@ -466,27 +476,26 @@ function buildLevel(n){
     coinArr.push({x:cx,y:cy,r:9,done:false,a:Math.random()*Math.PI*2});
   }
 
-  // Enemies
+  // Enemies (deterministic facing/phase)
   for(const e of layout.enemies){
     const ex=e.x*T, ey=e.fly?GY-T*3:GY-30;
+    const seed=(e.x*13+n*41)|0;
+    const dir=(seed&1)?1:-1;
     enemies.push({
       x:ex,y:ey,w:28,h:28,
-      vx:(Math.random()<.5?-1:1)*(1.0+0.15*n),
+      vx:dir*(1.0+0.15*n),
       vy:0,alive:true,og:false,
-      sqT:0,dir:1,wF:0,wT:0,
-      fly:e.fly,fa:Math.random()*Math.PI*2,
-      fAmp:24+Math.random()*16,baseY:ey,
+      sqT:0,dir,wF:0,wT:0,hitFlash:0,
+      fly:e.fly,fa:(seed%628)/100,
+      fAmp:24+(seed%16),baseY:ey,
       hp:n>=3?2:1
     });
   }
 
-  // Loose powerups — skip ground clutter on level 1 (tutorial)
-  if(n>1){
-    const puPositions=[[10,gr-2,'shroom'],[30,gr-2,'star'],[50,gr-2,'shroom'],[70,gr-2,'star']];
-    for(const [px,py,pt] of puPositions){
-      if(px<WW){
-        powerups.push({x:px*T,y:py*T,t:pt,vx:1.5,vy:0,og:false,done:false,a:0});
-      }
+  // Loose powerups placed on floating platforms only (never pit-risk)
+  if(layout.loosePU){
+    for(const [px,py,pt] of layout.loosePU){
+      if(px<WW) powerups.push({x:px*T,y:py*T,t:pt,vx:1.4,vy:0,og:false,done:false,a:0});
     }
   }
 
@@ -501,13 +510,18 @@ function buildLevel(n){
   // Flag
   const flagX=(WW-3)*T, flagY=(gr-6)*T;
 
-  return {plats,coins:coinArr,enemies,powerups,lava,flagX,flagY,WW,gr,GY,theme};
+  // Checkpoints (tile x positions)
+  const checkpoints=(layout.checkpoints||[]).map(cx=>({x:cx*T,y:GY-T,got:false}));
+
+  return {plats,coins:coinArr,enemies,powerups,lava,flagX,flagY,WW,gr,GY,theme,checkpoints};
 }
 
 // ─── PLAYER FACTORY ───────────────────────────────────────
 function mkP(){
+  const sx=ckpt.set?ckpt.x:2*T;
+  const sy=ckpt.set?ckpt.y:WLD.GY-T*1.5;
   return {
-    x:2*T,y:WLD.GY-T*1.5,w:22,h:32,
+    x:sx,y:sy,w:22,h:32,
     vx:0,vy:0,og:false,wog:false,
     facing:1,wF:0,wT:0,
     pl:0,    // power level 0=normal 1=super 2=moon
@@ -516,7 +530,8 @@ function mkP(){
     jbuf:0,  // jump buffer
     coy:0,   // coyote frames
     land:0,  // landing squash frames
-    jp:false // jump pressed this frame edge
+    dust:0,  // run dust timer
+    skid:0
   };
 }
 
@@ -531,7 +546,7 @@ function resolveP(dt){
   PL.x+=PL.vx*dt;
   PL.x=Math.max(0,PL.x);
   for(const pl of WLD.plats){
-    if(pl.tp==='q'&&pl.hit) continue; // hit q-blocks still solid
+    // spent Q-blocks stay solid
     if(rHit(PL.x,PL.y,PL.w,PL.h,pl.x,pl.y,pl.w,pl.h)){
       if(PL.vx>0)PL.x=pl.x-PL.w;
       else if(PL.vx<0)PL.x=pl.x+pl.w;
@@ -621,11 +636,38 @@ function resolveE(e,dt){
 
 // ─── UPDATE ───────────────────────────────────────────────
 function update(dt){
+  if(GS==='pause') return;
+  if(GS==='pole'){
+    FC++;
+    poleT++;
+    PL.vx=0; PL.facing=1;
+    const poleBottom=WLD.GY-PL.h;
+    PL.x=WLD.flagX+2;
+    PL.y=Math.min(poleBottom, PL.y+2.8*dt);
+    if(PL.y>=poleBottom-1 || poleT>90){
+      score+=1200*lv; updHUD(); GS='lc'; sfx.clear();
+      spP(WLD.flagX+12,WLD.flagY,'#ffd700',30,1.4);
+      spP(WLD.flagX+12,WLD.flagY,'#00ff9d',18);
+      setTimeout(()=>showEnd('lc'),500);
+    }
+    // still update particles/camera lightly
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=GRAV*.3*dt;p.life-=p.dc*dt;
+      if(p.life<=0) parts.splice(i,1);
+    }
+    return;
+  }
   if(GS!=='play') return;
   FC++;
 
   const spd=PL.pl===2?6.2:4.8;
   const want=L()?-spd:R()?spd:0;
+  // Skid detect
+  if(PL.og && want!==0 && Math.sign(want)!==Math.sign(PL.vx) && Math.abs(PL.vx)>2.2){
+    if(PL.skid<=0){ spP(PL.x+PL.w/2,PL.y+PL.h,'#c4b5fd',6,.7); PL.skid=10; }
+  }
+  if(PL.skid>0) PL.skid--;
+
   if(want!==0){
     const a=PL.og?ACCEL:AIR_ACCEL;
     PL.vx+=Math.sign(want-PL.vx)*Math.min(Math.abs(want-PL.vx),a*dt*spd);
@@ -647,12 +689,9 @@ function update(dt){
     spP(PL.x+PL.w/2,PL.y+PL.h,'#c4b5fd',7);
     sfx.jump();
   }
-  // Short hop cut
   if(!JMP()&&PL.vy<-3.5) PL.vy*=Math.pow(0.55,dt*0.35);
-  // Fall cap
   if(PL.vy>MAX_FALL) PL.vy=MAX_FALL;
 
-  // Update moving platforms + rider carry
   for(const pl of WLD.plats){
     if(pl.mov){
       const prev=pl.x;
@@ -667,8 +706,20 @@ function update(dt){
 
   const wasGround=PL.og;
   resolveP(dt);
-  if(PL.og&&!wasGround&&PL.vy>=0) PL.land=6;
+  if(PL.og&&!wasGround&&PL.vy>=0){
+    PL.land=6;
+    spP(PL.x+PL.w/2,PL.y+PL.h,'#a78bfa',8,.55);
+  }
   if(PL.land>0) PL.land--;
+
+  // Run dust
+  if(PL.og && Math.abs(PL.vx)>2.2){
+    PL.dust=(PL.dust||0)+dt;
+    if(PL.dust>2.5){
+      PL.dust=0;
+      parts.push({x:PL.x+PL.w/2-PL.facing*6,y:PL.y+PL.h-2,vx:-PL.facing*.6,vy:-.4,life:.7,dc:.05,col:'#c4b5fd',r:2});
+    }
+  }
 
   if(PL.inv>0) PL.inv--;
   if(PL.pt>0){
@@ -677,23 +728,44 @@ function update(dt){
     if(PL.pt<=0&&PL.pl===2){PL.pl=1;updHUD();msg('MOON MODE EXPIRED!');}
   }
 
-  // Walk anim
   if(Math.abs(PL.vx)>.5&&PL.og){
     PL.wT+=Math.abs(PL.vx)*.22*dt;
     if(PL.wT>1){PL.wF=(PL.wF+1)%6;PL.wT=0;}
   }
 
-  // Camera with velocity lookahead
+  // Combo decay
+  if(comboT>0){ comboT--; if(comboT<=0) combo=0; }
+  if(PL.og && comboT<=0) combo=0;
+
+  // Checkpoints
+  for(const c of WLD.checkpoints){
+    if(!c.got && PL.x+PL.w>c.x){
+      c.got=true;
+      ckpt={x:c.x,y:WLD.GY-PL.h,set:true};
+      msg('CHECKPOINT!');
+      spP(c.x,c.y,'#00ff9d',14);
+      ftxt(c.x,c.y-20,'SAVE','#00ff9d');
+      sfx.power();
+    }
+  }
+
+  // Camera X + soft Y follow
   const tc=PL.x-CW()/3+PL.vx*10;
   const maxC=WLD.WW*T-CW();
   const target=Math.max(0,Math.min(tc,maxC));
   const catchUp=Math.abs(target-camX)>180?.35:.22;
   camX+=(target-camX)*catchUp*dt;
+  // Soft vertical camera — only when player climbs above ~35% of screen
+  const screenY=PL.y-camY;
+  let idealY=camY;
+  if(screenY<CH()*0.28) idealY=PL.y-CH()*0.28;
+  else if(screenY>CH()*0.72) idealY=Math.max(0,PL.y-CH()*0.72);
+  idealY=Math.max(0, idealY);
+  camY+=(idealY-camY)*.14*dt;
 
   if(shTm>0){shTm--;shX=(Math.random()-.5)*4;shY=(Math.random()-.5)*4;}
   else{shX=0;shY=0;}
 
-  // Coins
   for(const c of WLD.coins){
     if(c.done) continue;
     c.a+=.065*dt;
@@ -705,7 +777,6 @@ function update(dt){
     }
   }
 
-  // Powerups
   for(const pu of WLD.powerups){
     if(pu.done) continue;
     resolvePU(pu,dt);pu.a+=.08*dt;
@@ -724,29 +795,31 @@ function update(dt){
     }
   }
 
-  // Enemies
   for(const e of WLD.enemies){
     if(!e.alive){if(e.sqT>0)e.sqT--;continue;}
     if(e.hitFlash>0) e.hitFlash--;
     resolveE(e,dt);
     e.wT=(e.wT||0)+.14*dt;e.wF=Math.floor(e.wT)%4;
-    if(e.y>CH()+100){e.alive=false;continue;}
+    if(e.y>CH()+100+camY){e.alive=false;continue;}
 
     if(PL.inv===0&&rHit(PL.x,PL.y,PL.w,PL.h,e.x,e.y,e.w,e.h)){
       if(PL.pl===2){
         e.alive=false;e.sqT=0;
+        combo++; comboT=50;
+        const pts=500*Math.min(combo,5);
         spP(e.x+e.w/2,e.y+e.h/2,'#ff6b00',14);
-        spP(e.x+e.w/2,e.y+e.h/2,'#ef4444',8);
-        score+=500;ftxt(e.x+e.w/2,e.y,'REKT +500','#ffd700');
+        score+=pts;ftxt(e.x+e.w/2,e.y,combo>1?`x${combo} +${pts}`:'REKT +500','#ffd700');
         sfx.stomp();shake(3,5);updHUD();
       }else{
         const stomped=PL.vy>0.8&&(PL.y+PL.h)<(e.y+e.h*.62);
         if(stomped){
           e.hp--;PL.vy=-9.2;shake(2,5);sfx.stomp();
+          combo++; comboT=50;
           if(e.hp<=0){
             e.alive=false;e.sqT=26;
+            const pts=200*Math.min(combo,5);
             spP(e.x+e.w/2,e.y+e.h/2,'#ff6b00',12);
-            score+=200;ftxt(e.x+e.w/2,e.y,'REKT +200','#ff6b00');
+            score+=pts;ftxt(e.x+e.w/2,e.y,combo>1?`x${combo} +${pts}`:'REKT +200','#ff6b00');
           }else{
             e.vx*=-1;e.hitFlash=18;ftxt(e.x+e.w/2,e.y,'HIT!','#fbbf24');
           }
@@ -758,7 +831,6 @@ function update(dt){
     }
   }
 
-  // Lava
   if(WLD.lava){
     for(const lv of WLD.lava){
       if(rHit(PL.x,PL.y,PL.w,PL.h,lv.x,lv.y-4,lv.w,lv.h+8)){
@@ -767,15 +839,14 @@ function update(dt){
     }
   }
 
-  // Fall off map
-  if(PL.y>CH()+80) hurtP(true);
+  if(PL.y>WLD.GY+120) hurtP(true);
 
-  // Flag
-  if(rHit(PL.x,PL.y,PL.w,PL.h,WLD.flagX,WLD.flagY,24,CH()-WLD.flagY)){
-    winLevel();
+  // Flag → pole slide
+  if(rHit(PL.x,PL.y,PL.w,PL.h,WLD.flagX,WLD.flagY,28,CH()-WLD.flagY+camY)){
+    GS='pole'; poleT=0; PL.vx=0; PL.vy=0;
+    msg('FLAG!'); sfx.clear();
   }
 
-  // Update particles
   for(let i=parts.length-1;i>=0;i--){
     const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=GRAV*.3*dt;p.life-=p.dc*dt;
     if(p.life<=0) parts.splice(i,1);
@@ -789,6 +860,7 @@ function update(dt){
 
 function hurtP(fell=false){
   if(PL.inv>0) return;
+  combo=0; comboT=0;
   if(PL.pl>0&&!fell){
     PL.pl=Math.max(0,PL.pl-1);PL.inv=100;
     PL.vx=-PL.facing*5.5;PL.vy=-7;
@@ -801,10 +873,11 @@ function hurtP(fell=false){
   spP(PL.x+PL.w/2,PL.y+PL.h/2,'#ef4444',22,1.4);
   shake(9,20);sfx.die();
   if(lives<=0){GS='over';setTimeout(()=>showEnd('over'),700);}
-  else{GS='dead';setTimeout(()=>{initLevel();GS='play';},1100);}
+  else{GS='dead';setTimeout(()=>{initLevel();GS='play';},900);}
 }
 
 function winLevel(){
+  // kept for compatibility — normal path uses pole slide
   score+=1200*lv;updHUD();GS='lc';sfx.clear();
   spP(WLD.flagX+12,WLD.flagY,'#ffd700',30,1.4);
   spP(WLD.flagX+12,WLD.flagY,'#00ff9d',18);
@@ -828,7 +901,7 @@ function drawBG(){
     ctx.globalAlpha=1;
   }
 
-  // Big moon decoration
+  // Big moon decoration + crater hills
   if(TH.bgMoon){
     ctx.globalAlpha=.18;
     ctx.fillStyle='#ffe9a0';
@@ -836,6 +909,15 @@ function drawBG(){
     ctx.globalAlpha=.06;ctx.fillStyle='#fff';
     ctx.beginPath();ctx.arc(CW()*.75-camX*.02,60,68,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;
+    // Distant crater hills (parallax)
+    ctx.fillStyle='#12082a';
+    for(let i=0;i<12;i++){
+      const hx=((i*90)-camX*.12)%(CW()+120)-40;
+      const hh=28+(i%3)*12;
+      ctx.beginPath();
+      ctx.ellipse(hx,CH()-8,50+i%4*8,hh,0,Math.PI,0);
+      ctx.fill();
+    }
   }
 
   // City silhouette
@@ -904,6 +986,9 @@ function drawPlat(pl){
       ctx.fillRect(sx+i+22,pl.y-5,5,5);
     }
   }else if(pl.tp==='brick'){
+    // Soft drop shadow
+    ctx.fillStyle='rgba(0,0,0,.28)';
+    ctx.fillRect(sx+3,pl.y+pl.h-1,pl.w,5);
     // Top highlight + body + bottom shadow for depth
     ctx.fillStyle=TH.bA;ctx.fillRect(sx,pl.y,pl.w,pl.h);
     ctx.fillStyle=TH.bB;
@@ -1054,14 +1139,27 @@ function drawPU(pu){
 function drawFlag(){
   const sx=WLD.flagX-camX;
   if(sx>CW()+50||sx<-50) return;
+  const wave=Math.sin(FC*.08)*3;
+  // base
+  ctx.fillStyle='#6b7280'; ctx.fillRect(sx+2,WLD.GY-6,20,6);
   // pole
-  ctx.fillStyle='#d1d5db';ctx.fillRect(sx+8,WLD.flagY,4,CH()-WLD.flagY);
-  // flag
-  ctx.shadowColor='#00ff9d';ctx.shadowBlur=14;
+  const poleH=WLD.GY-WLD.flagY;
+  const pg=ctx.createLinearGradient(sx+8,WLD.flagY,sx+12,WLD.flagY);
+  pg.addColorStop(0,'#e5e7eb'); pg.addColorStop(1,'#9ca3af');
+  ctx.fillStyle=pg; ctx.fillRect(sx+9,WLD.flagY,4,poleH);
+  // waving banner
+  ctx.shadowColor='#00ff9d';ctx.shadowBlur=12;
   ctx.fillStyle='#00ff9d';
-  ctx.beginPath();ctx.moveTo(sx+12,WLD.flagY);ctx.lineTo(sx+48,WLD.flagY+24);ctx.lineTo(sx+12,WLD.flagY+48);ctx.closePath();ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(sx+13,WLD.flagY+4);
+  ctx.quadraticCurveTo(sx+40+wave,WLD.flagY+18,sx+52+wave,WLD.flagY+14);
+  ctx.quadraticCurveTo(sx+40+wave,WLD.flagY+30,sx+13,WLD.flagY+40);
+  ctx.closePath(); ctx.fill();
   ctx.shadowBlur=0;
-  ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText('🚀',sx+32,WLD.flagY+28);ctx.textAlign='left';
+  ctx.fillStyle='#064e3b';
+  ctx.font=`8px 'Press Start 2P'`; ctx.textAlign='center';
+  ctx.fillText('$',sx+30+wave*.4,WLD.flagY+26);
+  ctx.textAlign='left';
 }
 
 // ─── DRAW PLAYER ──────────────────────────────────────────
@@ -1125,14 +1223,37 @@ function drawFTexts(){
 }
 
 // ─── RENDER ───────────────────────────────────────────────
+function drawCheckpoints(){
+  for(const c of WLD.checkpoints){
+    const sx=c.x-camX;
+    if(sx<-20||sx>CW()+20) continue;
+    const col=c.got?'#00ff9d':'#f7c948';
+    ctx.fillStyle=col;
+    ctx.fillRect(sx,c.y-40,3,40);
+    ctx.beginPath();
+    ctx.moveTo(sx+3,c.y-40); ctx.lineTo(sx+18,c.y-32); ctx.lineTo(sx+3,c.y-24);
+    ctx.closePath(); ctx.fill();
+    if(c.got){
+      ctx.globalAlpha=.25; ctx.fillStyle='#00ff9d';
+      ctx.beginPath(); ctx.arc(sx+2,c.y-42,10,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  }
+}
+
 function render(){
   ctx.clearRect(0,0,CW(),CH());
   if(!WLD) return;
+  // Background stays screen-locked; world scrolls with camY
   ctx.save();
   ctx.translate(shX,shY);
   drawBG();
+  ctx.restore();
+  ctx.save();
+  ctx.translate(shX,shY-camY);
   for(const pl of WLD.plats) drawPlat(pl);
   drawLava();
+  drawCheckpoints();
   drawFlag();
   for(const c of WLD.coins) drawCoin(c);
   for(const pu of WLD.powerups) drawPU(pu);
@@ -1144,12 +1265,28 @@ function render(){
   // Scanline retro overlay
   ctx.fillStyle='rgba(0,0,0,.032)';
   for(let y=0;y<CH();y+=4) ctx.fillRect(0,y,CW(),2);
+  // Combo meter
+  if(combo>1){
+    ctx.fillStyle='#ffd700';ctx.font=`10px 'Press Start 2P'`;
+    ctx.textAlign='center';
+    ctx.fillText('COMBO x'+combo,CW()/2,36);
+    ctx.textAlign='left';
+  }
   // Level name watermark (first 3 seconds)
-  if(FC<180){
+  if(FC<180 && GS==='play'){
     ctx.globalAlpha=Math.max(0,1-FC/150)*.6;
     ctx.fillStyle='#f7c948';ctx.font=`8px 'Press Start 2P'`;
     ctx.textAlign='center';ctx.fillText(WLD.theme.name,CW()/2,CH()/2-20);
     ctx.globalAlpha=1;ctx.textAlign='left';
+  }
+  // Pause overlay
+  if(GS==='pause'){
+    ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(0,0,CW(),CH());
+    ctx.fillStyle='#f7c948'; ctx.font=`16px 'Press Start 2P'`;
+    ctx.textAlign='center'; ctx.fillText('PAUSED',CW()/2,CH()/2-10);
+    ctx.font=`7px 'Press Start 2P'`; ctx.fillStyle='#aaa';
+    ctx.fillText('PRESS P / ESC',CW()/2,CH()/2+18);
+    ctx.textAlign='left';
   }
 }
 
@@ -1163,16 +1300,30 @@ function loop(t){
 }
 
 // ─── INIT ─────────────────────────────────────────────────
+function clearJumpKeys(){
+  ['Space','ArrowUp','KeyW','J'].forEach(k=>K[k]=false);
+}
+
 function initLevel(){
   WLD=buildLevel(lv);
+  // restore got flags for checkpoints already passed this life
+  if(ckpt.set && WLD.checkpoints){
+    for(const c of WLD.checkpoints){
+      if(c.x<=ckpt.x) c.got=true;
+    }
+  }
   PL=mkP();
-  parts=[];ftxts=[];camX=0;FC=0;
+  parts=[];ftxts=[];camX=Math.max(0,PL.x-CW()/3);camY=0;FC=0;combo=0;comboT=0;
+  clearJumpKeys();
   updHUD();
 }
 
 function startGame(){
   score=0;lives=3;coins=0;lv=1;
+  ckpt={x:2*T,y:0,set:false};
+  combo=0;comboT=0;
   document.getElementById('ov').style.display='none';
+  clearJumpKeys();
   initLevel();GS='play';
   if(RAF) cancelAnimationFrame(RAF);
   lastMs=performance.now();
@@ -1200,7 +1351,9 @@ function showEnd(type){
       <button class="btn" id="sb">▶ NEXT LEVEL</button>
       <div class="hint">PRESS ENTER</div>`;
     document.getElementById('sb').onclick=()=>{
+      ckpt={x:2*T,y:0,set:false};
       ov.style.display='none';
+      clearJumpKeys();
       initLevel();GS='play';
     };
   }
@@ -1209,13 +1362,20 @@ function showEnd(type){
 // ─── START IDLE RENDER ────────────────────────────────────
 document.getElementById('sb').onclick=startGame;
 document.addEventListener('keydown',e=>{
+  if(e.code==='KeyP'||e.code==='Escape'){
+    if(GS==='play'){ GS='pause'; e.preventDefault(); return; }
+    if(GS==='pause'){ GS='play'; lastMs=performance.now(); e.preventDefault(); return; }
+  }
   if(e.code!=='Enter'&&e.code!=='Space') return;
   if(GS==='idle'){ e.preventDefault(); startGame(); return; }
   if(GS==='over'){ e.preventDefault(); startGame(); return; }
+  if(GS==='pause'){ e.preventDefault(); GS='play'; lastMs=performance.now(); return; }
   if(GS==='lc'){
     e.preventDefault();
+    ckpt={x:2*T,y:0,set:false};
     const ov=document.getElementById('ov');
     ov.style.display='none';
+    clearJumpKeys();
     initLevel();GS='play';
   }
 });
