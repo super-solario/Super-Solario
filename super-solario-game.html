@@ -65,12 +65,13 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
 .hint{font-size:6px;color:#666;letter-spacing:1px}
 .best{font-size:7px;color:var(--mint);letter-spacing:1px;margin-top:2px}
 #progress{
-  position:absolute;left:10px;right:10px;bottom:10px;height:4px;z-index:4;
-  background:rgba(255,255,255,.08);border:1px solid rgba(240,180,41,.25);
-  pointer-events:none;opacity:0;transition:opacity .2s;
+  position:absolute;left:12px;right:12px;bottom:12px;height:6px;z-index:4;
+  background:rgba(0,0,0,.45);border:1px solid rgba(240,180,41,.45);
+  pointer-events:none;opacity:0;transition:opacity .2s;border-radius:2px;
+  box-shadow:0 0 8px rgba(240,180,41,.25);
 }
 #progress.show{opacity:1}
-#progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--mint));transition:width .08s linear}
+#progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--mint));transition:width .08s linear;border-radius:1px}
 #toast{
   position:absolute;top:12%;left:50%;transform:translateX(-50%);
   background:rgba(0,0,0,.92);border:2px solid var(--gold);color:var(--gold);
