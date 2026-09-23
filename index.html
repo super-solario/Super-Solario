@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>$SOLARIO — Play. Stack. Moon.</title>
-<meta name="description" content="$SOLARIO — the playable Solana meme coin. Super Solario Bros platformer with a live diamond-hands leaderboard.">
+<meta name="description" content="$SOLARIO — a Solana meme coin with a real browser platformer. Local diamond-hands scoreboard on this device.">
 <meta name="theme-color" content="#05050c">
+<meta name="robots" content="index,follow">
 <meta property="og:title" content="$SOLARIO — Play. Stack. Moon.">
-<meta property="og:description" content="Stack coins, stomp bears, climb the live leaderboard.">
+<meta property="og:description" content="Play Super Solario Bros. Stack coins, stomp bears. Browser scoreboard on this device.">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="$SOLARIO — Play. Stack. Moon.">
+<meta name="twitter:description" content="Playable Solana meme coin energy — browser platformer included.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect fill='%2305050c' width='64' height='64'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='36'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -177,6 +182,7 @@ section{padding:90px 20px}
 .lb-row.top .lb-rank{color:var(--gold)}
 .lb-name{font-family:var(--font-pixel);font-size:8px;color:#fff;letter-spacing:.5px}
 .lb-name .you-tag{color:var(--gold);font-size:6px;margin-left:6px}
+.lb-name .demo-tag{color:var(--muted);font-size:6px;margin-left:6px}
 .lb-meta{font-size:11px;color:var(--muted);margin-top:3px}
 .lb-score{font-family:var(--font-pixel);font-size:8px;color:var(--mint);text-align:right}
 .lb-empty{color:var(--muted);font-size:13px;padding:24px 8px;text-align:center}
@@ -233,9 +239,11 @@ section{padding:90px 20px}
 .fq{
   padding:18px 0;font-family:var(--font-pixel);font-size:8px;color:var(--gold);
   cursor:pointer;display:flex;justify-content:space-between;gap:12px;user-select:none;
+  width:100%;background:none;border:none;text-align:left;
 }
 .fa{max-height:0;overflow:hidden;font-size:13px;color:var(--muted);line-height:1.7;transition:max-height .35s}
 .fi.open .fa{max-height:320px;padding-bottom:14px}
+.fi.open .fq{color:#ffe6a0}
 
 footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040a}
 .foot{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -291,8 +299,8 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     <h1 class="hero-brand">$SOLARIO</h1>
     <p class="hero-line">TRADE ENERGY. GAME SKILL. MOON MATH.</p>
     <p class="hero-sub">
-      The <span>playable meme coin</span> with a real platformer and a live scoreboard.
-      Stack coins, stomp bears, submit your alias — climb the board.
+      The <span>playable meme coin</span> with a real browser platformer and a local scoreboard.
+      Stack coins, stomp bears, submit your alias — climb the board on this device.
     </p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="#play">PLAY SUPER SOLARIO</a>
@@ -304,19 +312,19 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
 
 <div class="ticker-wrap" aria-hidden="true">
   <div class="ticker" id="ticker">
-    <span>$SOLARIO <span class="up">+420.69%</span></span>
+    <span>$SOLARIO PLAYABLE</span>
     <span>GAME ONLINE</span>
-    <span>LEADERBOARD LIVE</span>
+    <span>LOCAL BOARD</span>
     <span>BEARS <span class="dn">REKT</span></span>
     <span>SUPPLY 1B</span>
-    <span>LP LOCKED 2YR</span>
+    <span>MEME ENERGY</span>
     <span>DIAMOND HANDS ONLY</span>
-    <span>$SOLARIO <span class="up">+420.69%</span></span>
+    <span>$SOLARIO PLAYABLE</span>
     <span>GAME ONLINE</span>
-    <span>LEADERBOARD LIVE</span>
+    <span>LOCAL BOARD</span>
     <span>BEARS <span class="dn">REKT</span></span>
     <span>SUPPLY 1B</span>
-    <span>LP LOCKED 2YR</span>
+    <span>MEME ENERGY</span>
     <span>DIAMOND HANDS ONLY</span>
   </div>
 </div>
@@ -325,11 +333,11 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   <div class="wrap">
     <span class="tag">// PLAYABLE UTILITY</span>
     <h2 class="htag">SUPER SOLARIO BROS</h2>
-    <p class="desc">Enter a username in-game, clear levels, and your best run syncs to the live board on this page.</p>
+    <p class="desc">Enter a username in-game, clear levels, and your best run syncs to the local board on this page (this browser / device).</p>
     <div class="play-grid">
       <div class="game-shell">
-        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2.1</span></div>
-        <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario Bros" allow="autoplay" loading="lazy"></iframe>
+        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2.2</span></div>
+        <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario Bros" allow="autoplay; clipboard-write" loading="lazy"></iframe>
         <div class="game-note">
           Or <a href="super-solario-game.html" target="_blank" rel="noopener">open full screen</a>
           · ← → move · space jump · P pause · M mute
@@ -338,7 +346,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <aside class="lb-panel" id="leaderboard">
         <div class="lb-head">
           <h3>DIAMOND HANDS BOARD</h3>
-          <div class="lb-live"><i></i> LIVE</div>
+          <div class="lb-live"><i></i> LOCAL</div>
         </div>
         <ol class="lb-list" id="lbList"></ol>
         <div class="lb-youbar" id="lbYou"></div>
@@ -346,7 +354,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
           <h4>LATEST RUNS</h4>
           <div id="lbRecent"></div>
         </div>
-        <p class="lb-foot">Best score per username. Board + recent runs update live when you finish — synced across tabs on this device.</p>
+        <p class="lb-foot">Best score per username on <b>this device</b>. Stored in your browser (localStorage) — not on-chain, not a global competitive board. Demo rows are labeled DEMO.</p>
       </aside>
     </div>
   </div>
@@ -356,19 +364,19 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   <div class="wrap">
     <span class="tag">// TOKENOMICS</span>
     <h2 class="htag">1,000,000,000 $SOLARIO</h2>
-    <p class="desc">Fair launch energy. No VC bags. Liquidity locked. Gaming rewards for players who actually play.</p>
+    <p class="desc">Community meme-coin framing for $SOLARIO. Figures below are illustrative launch targets — verify contracts, locks, and renounce status yourself before buying anything.</p>
     <div class="stats">
-      <div class="stat"><strong>1B</strong><span>TOTAL SUPPLY</span></div>
-      <div class="stat"><strong>5%</strong><span>TAX</span></div>
-      <div class="stat"><strong>2YR</strong><span>LP LOCK</span></div>
-      <div class="stat"><strong>YES</strong><span>RENOUNCED</span></div>
+      <div class="stat"><strong>1B</strong><span>TARGET SUPPLY</span></div>
+      <div class="stat"><strong>—</strong><span>VERIFY TAX</span></div>
+      <div class="stat"><strong>—</strong><span>VERIFY LP</span></div>
+      <div class="stat"><strong>—</strong><span>VERIFY OWNERSHIP</span></div>
     </div>
     <div class="split">
-      <div class="piece"><b>40%</b><em>PUBLIC SALE</em><p>Fair launch. First come, first moon.</p></div>
-      <div class="piece"><b>20%</b><em>LIQUIDITY</em><p>Locked LP. Rug-resistant by design.</p></div>
-      <div class="piece"><b>15%</b><em>GAME REWARDS</em><p>Fuel for leaderboard seasons & P2E.</p></div>
-      <div class="piece"><b>15%</b><em>TREASURY</em><p>Listings, partnerships, burns.</p></div>
-      <div class="piece"><b>10%</b><em>TEAM</em><p>Vested. Cliffed. Same diamond rules.</p></div>
+      <div class="piece"><b>40%</b><em>PUBLIC</em><p>Intended fair launch allocation. Confirm on-chain.</p></div>
+      <div class="piece"><b>20%</b><em>LIQUIDITY</em><p>Planned LP. Confirm lock proof before trusting.</p></div>
+      <div class="piece"><b>15%</b><em>GAME / REWARDS</em><p>Reserved for seasons &amp; play incentives (aspirational).</p></div>
+      <div class="piece"><b>15%</b><em>TREASURY</em><p>Listings, partnerships, burns — community governed later.</p></div>
+      <div class="piece"><b>10%</b><em>TEAM</em><p>Intended vest/cliff. Confirm vesting if published.</p></div>
     </div>
   </div>
 </section>
@@ -381,16 +389,16 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <div class="phase">
         <h4>PHASE 1<br>LAUNCH</h4>
         <ul>
-          <li class="done">✓ Token + site</li>
+          <li class="done">✓ Site live</li>
           <li class="done">✓ Game v2</li>
-          <li class="done">✓ Live leaderboard</li>
+          <li class="done">✓ Local scoreboard</li>
         </ul>
         <span class="badge">COMPLETE</span>
       </div>
       <div class="phase">
         <h4>PHASE 2<br>GROW</h4>
         <ul>
-          <li class="done">✓ Coin trackers</li>
+          <li>◻ Community push</li>
           <li>◻ Season rewards</li>
           <li>◻ More levels</li>
         </ul>
@@ -399,18 +407,18 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <div class="phase">
         <h4>PHASE 3<br>BUILD</h4>
         <ul>
-          <li>◻ P2E staking</li>
-          <li>◻ NFT runners</li>
-          <li>◻ Global board API</li>
+          <li>◻ Optional play rewards</li>
+          <li>◻ NFT runners (maybe)</li>
+          <li>◻ Server / global board</li>
         </ul>
         <span class="badge soon">NEXT</span>
       </div>
       <div class="phase">
         <h4>PHASE 4<br>MOON</h4>
         <ul>
-          <li>◻ Major CEX</li>
-          <li>◻ Mobile app</li>
-          <li>◻ DAO votes</li>
+          <li>◻ Exchange interest</li>
+          <li>◻ Mobile polish</li>
+          <li>◻ Community votes</li>
         </ul>
         <span class="badge soon">SOON</span>
       </div>
@@ -423,9 +431,10 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     <span class="tag">// FAQ</span>
     <h2 class="htag">QUICK FILLS</h2>
     <div class="faq">
-      <div class="fi"><div class="fq" onclick="this.parentElement.classList.toggle('open')">How does the leaderboard work? <span>▾</span></div><div class="fa">Enter a username in the game. When your run ends, your best score is saved and the board on this page updates live — including across open tabs.</div></div>
-      <div class="fi"><div class="fq" onclick="this.parentElement.classList.toggle('open')">Is $SOLARIO a game or a coin? <span>▾</span></div><div class="fa">Both. It's a Solana meme coin with a real playable platformer as product — not just a whitepaper screenshot.</div></div>
-      <div class="fi"><div class="fq" onclick="this.parentElement.classList.toggle('open')">Can I play on mobile? <span>▾</span></div><div class="fa">Yes. On-screen controls appear on touch devices. Landscape mode feels best.</div></div>
+      <div class="fi"><button type="button" class="fq" aria-expanded="false">How does the leaderboard work? <span>▾</span></button><div class="fa">Enter a username in the game. When a run ends, your best score is saved in <b>this browser</b> (localStorage) and the board updates across tabs on this device. It is <b>not</b> an on-chain or global competitive leaderboard.</div></div>
+      <div class="fi"><button type="button" class="fq" aria-expanded="false">Is $SOLARIO a game or a coin? <span>▾</span></button><div class="fa">Both vibes. It's a Solana meme-coin project with a real playable browser platformer. The coin is speculative; the game is free to play.</div></div>
+      <div class="fi"><button type="button" class="fq" aria-expanded="false">Can I play on mobile? <span>▾</span></button><div class="fa">Yes. On-screen controls appear on touch devices. Landscape mode feels best.</div></div>
+      <div class="fi"><button type="button" class="fq" aria-expanded="false">Is this financial advice? <span>▾</span></button><div class="fa">No. Meme coins can go to zero. There is no expectation of profit. Do your own research, verify any contract address yourself, and never risk money you cannot lose.</div></div>
     </div>
   </div>
 </section>
@@ -434,7 +443,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   <div class="foot">
     <div>
       <div class="brand">🌙 $SOLARIO</div>
-      <p>Playable meme coin energy. Not financial advice. DYOR. Diamond hands required.</p>
+      <p>Playable meme coin energy. Not financial advice. No expectation of return. DYOR. Verify everything on-chain yourself.</p>
     </div>
     <div>
       <a href="#play">Play</a>
@@ -442,7 +451,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <a href="super-solario-game.html" target="_blank" rel="noopener">Full-screen game</a>
     </div>
   </div>
-  <p class="tiny">© 2026 Super Solario. Community driven.</p>
+  <p class="tiny">© 2026 Super Solario. Community-driven entertainment. Cryptocurrency is high risk.</p>
 </footer>
 
 <script>
@@ -450,8 +459,27 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   const list = document.getElementById('lbList');
   const recentEl = document.getElementById('lbRecent');
   const youEl = document.getElementById('lbYou');
+  const gameFrame = document.getElementById('gameFrame');
   let firstPaint = true;
   let knownTs = new Set();
+  const esc = (s) => SolarioLB.escapeHtml(s);
+
+  // FAQ accordion (buttons)
+  document.querySelectorAll('#faq .fq').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const fi = btn.parentElement;
+      const open = !fi.classList.contains('open');
+      document.querySelectorAll('#faq .fi.open').forEach((el) => {
+        if (el !== fi) {
+          el.classList.remove('open');
+          const b = el.querySelector('.fq');
+          if (b) b.setAttribute('aria-expanded', 'false');
+        }
+      });
+      fi.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
 
   function renderRecent(recent) {
     const rows = recent || SolarioLB.getRecent(8);
@@ -461,28 +489,30 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     }
     recentEl.innerHTML = rows.map(r => `
       <div class="recent-row">
-        <div><b>${r.name}</b> · Lv ${r.level} · ${SolarioLB.timeAgo(r.ts)}</div>
-        <span>${SolarioLB.formatScore(r.score)}</span>
+        <div><b>${esc(r.name)}</b> · Lv ${esc(r.level)} · ${esc(SolarioLB.timeAgo(r.ts))}</div>
+        <span>${esc(SolarioLB.formatScore(r.score))}</span>
       </div>`).join('');
   }
 
   function renderYou(scores) {
     const me = SolarioLB.getUsername();
-    if (!me) { youEl.classList.remove('show'); youEl.innerHTML = ''; return; }
+    if (!me) { youEl.classList.remove('show'); youEl.textContent = ''; return; }
     const rows = scores || SolarioLB.getScores();
     const idx = rows.findIndex(r => r.name === me);
     if (idx < 0) {
       youEl.classList.add('show');
-      youEl.innerHTML = `YOU · ${me}<br><span style="color:#888">No score yet — finish a run to place.</span>`;
+      youEl.innerHTML = `YOU · ${esc(me)}<br><span style="color:#888">No score yet — finish a run to place.</span>`;
       return;
     }
     const r = rows[idx];
     youEl.classList.add('show');
-    youEl.innerHTML = `YOU · ${me} · RANK #${idx + 1} · <span style="color:var(--mint)">${SolarioLB.formatScore(r.score)}</span><br>Lv ${r.level} · ${r.coins} coins`;
+    youEl.innerHTML = `YOU · ${esc(me)} · RANK #${idx + 1} · <span style="color:var(--mint)">${esc(SolarioLB.formatScore(r.score))}</span><br>Lv ${esc(r.level)} · ${esc(r.coins)} coins`;
   }
 
-  function renderBoard(scores, recent) {
-    const rows = scores || SolarioLB.getScores();
+  function renderBoard() {
+    // Always read from sanitized local store — never trust postMessage payloads.
+    const rows = SolarioLB.getScores();
+    const recent = SolarioLB.getRecent(8);
     const me = SolarioLB.getUsername();
     if (!rows.length) {
       list.innerHTML = '<li class="lb-empty">No scores yet — be the first moon mission.</li>';
@@ -490,14 +520,15 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       list.innerHTML = rows.slice(0, 15).map((r, i) => {
         const isYou = me && r.name === me;
         const fresh = !firstPaint && r.ts && !knownTs.has(r.ts + ':' + r.name);
+        const demo = r.seed ? '<span class="demo-tag">DEMO</span>' : '';
         return `
         <li class="lb-row ${i < 3 ? 'top' : ''} ${isYou ? 'you' : ''} ${fresh ? 'fresh' : ''}">
           <span class="lb-rank">#${i + 1}</span>
           <div>
-            <div class="lb-name">${r.name}${isYou ? '<span class="you-tag">YOU</span>' : ''}</div>
-            <div class="lb-meta" data-ts="${r.ts}">Lv ${r.level} · ${r.coins} coins · ${SolarioLB.timeAgo(r.ts)}</div>
+            <div class="lb-name">${esc(r.name)}${isYou ? '<span class="you-tag">YOU</span>' : ''}${demo}</div>
+            <div class="lb-meta" data-ts="${esc(r.ts)}">Lv ${esc(r.level)} · ${esc(r.coins)} coins · ${esc(SolarioLB.timeAgo(r.ts))}</div>
           </div>
-          <div class="lb-score">${SolarioLB.formatScore(r.score)}</div>
+          <div class="lb-score">${esc(SolarioLB.formatScore(r.score))}</div>
         </li>`;
       }).join('');
       knownTs = new Set(rows.map(r => r.ts + ':' + r.name));
@@ -514,14 +545,13 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     const top = (scores || SolarioLB.getScores()).slice(0, 3);
     const recent = SolarioLB.getRecent(1)[0];
     const bits = [
-      '$SOLARIO <span class="up">+420.69%</span>',
+      '$SOLARIO PLAYABLE',
       'GAME ONLINE',
-      'LEADERBOARD LIVE',
-      ...top.map((r, i) => `#${i + 1} ${r.name} ${SolarioLB.formatScore(r.score)}`),
-      recent ? `LATEST ${recent.name} ${SolarioLB.formatScore(recent.score)}` : 'BEARS <span class="dn">REKT</span>',
+      'LOCAL BOARD',
+      ...top.map((r, i) => `#${i + 1} ${esc(r.name)} ${esc(SolarioLB.formatScore(r.score))}${r.seed ? ' (DEMO)' : ''}`),
+      recent ? `LATEST ${esc(recent.name)} ${esc(SolarioLB.formatScore(recent.score))}` : 'BEARS <span class="dn">REKT</span>',
       'BEARS <span class="dn">REKT</span>',
       'SUPPLY 1B',
-      'LP LOCKED 2YR',
       'DIAMOND HANDS ONLY'
     ];
     const html = bits.map(b => `<span>${b}</span>`).join('') + bits.map(b => `<span>${b}</span>`).join('');
@@ -544,14 +574,15 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   }
 
   renderBoard();
-  SolarioLB.onUpdate((scores, recent) => renderBoard(scores, recent));
+  SolarioLB.onUpdate(() => renderBoard());
   setInterval(refreshTimesOnly, 15000);
 
   window.addEventListener('message', (e) => {
     if (!e.data || typeof e.data !== 'object') return;
+    if (e.origin !== location.origin) return;
+    if (gameFrame && e.source && e.source !== gameFrame.contentWindow) return;
     if (e.data.type === 'solario-score') {
-      const p = e.data.payload || {};
-      renderBoard(p.scores, p.recent);
+      renderBoard();
     }
     if (e.data.type === 'solario-scroll-lb') {
       document.getElementById('leaderboard').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -561,7 +592,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   // Hero canvas — pause when offscreen / hidden / reduced motion
   const hc = document.getElementById('heroCanvas');
   const hx = hc.getContext('2d', { alpha: false });
-  let stars = [], candles = [], heroOn = true, heroVisible = true, heroRaf = 0, resizeT = 0;
+  let stars = [], candles = [], heroVisible = true, heroRaf = 0, resizeT = 0;
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function sizeHero() {
@@ -604,7 +635,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   }
 
   function heroLoop(t) {
-    if (heroOn && heroVisible && !document.hidden && !reduceMotion) {
+    if (heroVisible && !document.hidden && !reduceMotion) {
       drawHero(t);
       heroRaf = requestAnimationFrame(heroLoop);
     } else {
@@ -613,7 +644,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     }
   }
   function ensureHero() {
-    if (!heroRaf && heroOn && heroVisible && !document.hidden && !reduceMotion) {
+    if (!heroRaf && heroVisible && !document.hidden && !reduceMotion) {
       heroRaf = requestAnimationFrame(heroLoop);
     }
   }

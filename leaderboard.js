@@ -1,7 +1,8 @@
 /**
- * Super Solario — Live Leaderboard
- * Best-per-user board + recent runs feed.
+ * Super Solario — Local Leaderboard (v2)
+ * Best-per-user board + recent runs.
  * Syncs via localStorage + BroadcastChannel (site ↔ game iframe ↔ tabs).
+ * Scores are browser-local only — not on-chain / not a global competitive board.
  */
 (function (global) {
   const KEY = 'solario_leaderboard_v2';
@@ -10,8 +11,64 @@
   const CHANNEL = 'solario_lb';
   const MAX = 25;
   const MAX_RECENT = 12;
+  const MAX_SCORE = 9999999;
+  const MAX_COINS = 99999;
+  const MAX_LEVEL = 99;
 
   const bus = ('BroadcastChannel' in global) ? new BroadcastChannel(CHANNEL) : null;
+
+  function normalizeName(name) {
+    return String(name || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9_]/g, '')
+      .slice(0, 12);
+  }
+
+  function clampInt(n, min, max) {
+    const v = Math.floor(Number(n));
+    if (!Number.isFinite(v)) return min;
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function sanitizeEntry(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const name = normalizeName(raw.name);
+    if (!name) return null;
+    return {
+      name,
+      score: clampInt(raw.score, 0, MAX_SCORE),
+      coins: clampInt(raw.coins, 0, MAX_COINS),
+      level: clampInt(raw.level, 1, MAX_LEVEL),
+      ts: clampInt(raw.ts, 0, Date.now() + 60000) || Date.now(),
+      seed: !!raw.seed
+    };
+  }
+
+  function sanitizeList(arr) {
+    if (!Array.isArray(arr)) return [];
+    const out = [];
+    const seen = Object.create(null);
+    for (let i = 0; i < arr.length; i++) {
+      const e = sanitizeEntry(arr[i]);
+      if (!e || seen[e.name]) continue;
+      seen[e.name] = true;
+      out.push(e);
+    }
+    return out;
+  }
+
+  function sanitizeRecent(arr) {
+    if (!Array.isArray(arr)) return [];
+    const out = [];
+    for (let i = 0; i < arr.length; i++) {
+      const e = sanitizeEntry(arr[i]);
+      if (!e || e.seed) continue;
+      out.push(e);
+      if (out.length >= MAX_RECENT) break;
+    }
+    return out;
+  }
 
   function seed() {
     const now = Date.now();
@@ -25,16 +82,26 @@
     ];
   }
 
+  function safeSet(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function read() {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) {
         const s = seed();
-        localStorage.setItem(KEY, JSON.stringify(s));
-        return s;
+        safeSet(KEY, JSON.stringify(s));
+        return s.slice();
       }
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : seed();
+      const clean = sanitizeList(parsed);
+      return clean.length ? clean : seed();
     } catch (e) {
       return seed();
     }
@@ -44,45 +111,38 @@
     try {
       const raw = localStorage.getItem(RECENT_KEY);
       if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      return sanitizeRecent(JSON.parse(raw));
     } catch (e) {
       return [];
     }
   }
 
   function emit(scores, recent) {
-    if (bus) bus.postMessage({ type: 'update', scores, recent });
+    if (bus) {
+      try { bus.postMessage({ type: 'update', scores, recent }); } catch (e) {}
+    }
     try {
       global.dispatchEvent(new CustomEvent('solario-lb', { detail: { scores, recent } }));
     } catch (e) {}
   }
 
   function write(list) {
-    const sliced = list.slice(0, MAX);
-    localStorage.setItem(KEY, JSON.stringify(sliced));
+    const sliced = sanitizeList(list).slice(0, MAX);
+    safeSet(KEY, JSON.stringify(sliced));
     emit(sliced, readRecent());
   }
 
   function writeRecent(list) {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
-  }
-
-  function normalizeName(name) {
-    return String(name || '')
-      .trim()
-      .toUpperCase()
-      .replace(/[^A-Z0-9_]/g, '')
-      .slice(0, 12);
+    safeSet(RECENT_KEY, JSON.stringify(sanitizeRecent(list).slice(0, MAX_RECENT)));
   }
 
   function getUsername() {
-    try { return localStorage.getItem(USER_KEY) || ''; } catch (e) { return ''; }
+    try { return normalizeName(localStorage.getItem(USER_KEY) || ''); } catch (e) { return ''; }
   }
 
   function setUsername(name) {
     const n = normalizeName(name);
-    if (n) localStorage.setItem(USER_KEY, n);
+    if (n) safeSet(USER_KEY, n);
     return n;
   }
 
@@ -117,18 +177,17 @@
   }
 
   function submitScore({ name, score, coins, level }) {
-    const entry = {
-      name: normalizeName(name || getUsername()),
-      score: Math.max(0, Math.floor(Number(score) || 0)),
-      coins: Math.max(0, Math.floor(Number(coins) || 0)),
-      level: Math.max(1, Math.floor(Number(level) || 1)),
+    const entry = sanitizeEntry({
+      name: name || getUsername(),
+      score,
+      coins,
+      level,
       ts: Date.now(),
       seed: false
-    };
-    if (!entry.name) return { ok: false, reason: 'name', entry };
+    });
+    if (!entry) return { ok: false, reason: 'name', entry: null };
     if (entry.score <= 0) return { ok: false, reason: 'zero', entry };
 
-    // Recent runs feed (always append real runs)
     const recent = readRecent();
     recent.unshift(entry);
     writeRecent(recent);
@@ -196,21 +255,31 @@
   }
 
   function formatScore(n) {
-    return Number(n || 0).toLocaleString();
+    return clampInt(n, 0, MAX_SCORE).toLocaleString();
   }
 
   function timeAgo(ts) {
-    const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    const s = Math.max(0, Math.floor((Date.now() - Number(ts || 0)) / 1000));
     if (s < 60) return s + 's ago';
     if (s < 3600) return Math.floor(s / 60) + 'm ago';
     if (s < 86400) return Math.floor(s / 3600) + 'h ago';
     return Math.floor(s / 86400) + 'd ago';
   }
 
+  /** Escape for safe HTML interpolation (names are already A-Z0-9_ but belt+suspenders). */
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   global.SolarioLB = {
-    KEY, RECENT_KEY, MAX, MAX_RECENT,
+    KEY, RECENT_KEY, MAX, MAX_RECENT, MAX_SCORE,
     getScores, getRecent, getRank, getEntry, getTop, getPersonalBest,
-    submitScore, getUsername, setUsername, normalizeName,
-    onUpdate, formatScore, timeAgo, shareText, shareScore
+    submitScore, getUsername, setUsername, normalizeName, sanitizeEntry,
+    onUpdate, formatScore, timeAgo, shareText, shareScore, escapeHtml
   };
 })(typeof window !== 'undefined' ? window : globalThis);

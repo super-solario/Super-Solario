@@ -118,8 +118,8 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
     <div id="toast"></div>
     <div id="overlay">
       <div class="logo">SUPER<br>SOLARIO</div>
-      <div class="sub">ON-CHAIN PLATFORMER</div>
-      <div class="blurb">Enter a wallet alias, then stomp bears &amp; stack <b>$SOLARIO</b>.<br>Top scores hit the live leaderboard.</div>
+      <div class="sub">BROWSER PLATFORMER</div>
+      <div class="blurb">Enter a wallet alias, then stomp bears &amp; stack <b>$SOLARIO</b>.<br>Best scores save to a <b>local</b> board on this device.</div>
       <div class="best" id="bestLine"></div>
       <input id="uname" maxlength="12" placeholder="USERNAME" autocomplete="off" spellcheck="false">
       <div class="row">
@@ -587,10 +587,10 @@ function showEntry() {
   overlay.classList.remove('hidden');
   overlay.innerHTML = `
     <div class="logo">SUPER<br>SOLARIO</div>
-    <div class="sub">ON-CHAIN PLATFORMER</div>
-    <div class="blurb">Enter a wallet alias, then stomp bears &amp; stack <b>$SOLARIO</b>.<br>Top scores hit the live leaderboard.</div>
+    <div class="sub">BROWSER PLATFORMER</div>
+    <div class="blurb">Enter a wallet alias, then stomp bears &amp; stack <b>$SOLARIO</b>.<br>Best scores save to a <b>local</b> board on this device.</div>
     <div class="best" id="bestLine"></div>
-    <input id="uname" maxlength="12" placeholder="USERNAME" autocomplete="off" spellcheck="false" value="${username}">
+    <input id="uname" maxlength="12" placeholder="USERNAME" autocomplete="off" spellcheck="false" value="${(username || '').replace(/"/g, '')}">
     <div class="row"><button class="btn" id="btnStart">LAUNCH</button></div>
     <div class="hint">← → MOVE · SPACE JUMP · P PAUSE · M MUTE</div>`;
   refreshBestLine();
@@ -609,7 +609,9 @@ function submitToBoard(force) {
   if (!window.SolarioLB) return null;
   const res = SolarioLB.submitScore({ name: username, score, coins, level });
   try {
-    parent.postMessage({ type: 'solario-score', payload: res }, '*');
+    if (window.parent && window.parent !== window) {
+      parent.postMessage({ type: 'solario-score', payload: { ok: !!(res && res.ok) } }, location.origin);
+    }
   } catch (e) {}
   if (res && res.ok) toast(res.improved ? `BOARD #${res.rank}` : 'BEST KEPT');
   return res;
@@ -646,7 +648,15 @@ function gameOver() {
   document.getElementById('btnRetry').onclick = () => showEntry();
   bindShare('btnShare', rank);
   document.getElementById('btnBoard').onclick = () => {
-    try { parent.postMessage({ type: 'solario-scroll-lb' }, '*'); } catch (e) {}
+    try {
+      if (window.parent && window.parent !== window) {
+        parent.postMessage({ type: 'solario-scroll-lb' }, location.origin);
+      } else {
+        location.href = 'index.html#leaderboard';
+      }
+    } catch (e) {
+      location.href = 'index.html#leaderboard';
+    }
   };
 }
 
@@ -714,7 +724,11 @@ function hurt(fell = false) {
 
 // ── Update ───────────────────────────────────────────────
 function update(dt) {
-  if (state === 'pause' || state === 'entry' || state === 'over' || state === 'clear' || state === 'dead') return;
+  if (state === 'pause' || state === 'entry' || state === 'over' || state === 'clear') return;
+  if (state === 'dead') {
+    tickFx(dt);
+    return;
+  }
 
   if (state === 'pole') {
     frame++; poleT++;
@@ -923,7 +937,8 @@ function drawBG() {
   if (th.stars) {
     const starN = reduceMotion ? 40 : 80;
     for (let i = 0; i < starN; i++) {
-      const x = ((i * 97) - camX * 0.08) % W();
+      let x = ((i * 97) - camX * 0.08) % W();
+      if (x < 0) x += W();
       const y = (i * 53) % (H() * 0.7);
       ctx.globalAlpha = reduceMotion ? 0.55 : (0.35 + 0.65 * Math.abs(Math.sin(frame * 0.03 + i)));
       ctx.fillStyle = '#fff';
@@ -1213,7 +1228,7 @@ hud();
 last = performance.now();
 raf = requestAnimationFrame(loop);
 
-// Expose for tests
+// Expose for tests / optional debug (?debug=1)
 window.__SOLARIO_GAME__ = {
   get state() { return state; },
   get score() { return score; },
@@ -1229,10 +1244,15 @@ window.__SOLARIO_GAME__ = {
   togglePause,
   submitToBoard,
   loadLevel,
-  setMuted,
-  // test helper: grant points as if collected
-  __debugAddScore(n){ addScore(n); }
+  setMuted
 };
+(function exposeDebug() {
+  let on = false;
+  try { on = /(?:^|[?&])debug=1(?:&|$)/.test(location.search); } catch (e) {}
+  if (on) {
+    window.__SOLARIO_GAME__.__debugAddScore = function (n) { addScore(n); };
+  }
+})();
 })();
 </script>
 </body>

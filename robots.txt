@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /super_solario_v11.html
+
+# Super Solario — public static site
+# Leaderboard scores are local to each browser (not on-chain).
