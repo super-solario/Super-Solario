@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>$SOLARIO — Play. Stack. Moon.</title>
+<meta name="description" content="$SOLARIO — the playable Solana meme coin. Super Solario Bros platformer with a live diamond-hands leaderboard.">
+<meta name="theme-color" content="#05050c">
+<meta property="og:title" content="$SOLARIO — Play. Stack. Moon.">
+<meta property="og:description" content="Stack coins, stomp bears, climb the live leaderboard.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="leaderboard.js"></script>
 <style>
@@ -17,6 +24,9 @@
 }
 html{scroll-behavior:smooth}
 body{background:var(--ink);color:var(--text);font-family:var(--font-body);overflow-x:hidden}
+a:focus-visible,button:focus-visible,.btn:focus-visible,.nav-cta:focus-visible{
+  outline:2px solid var(--gold);outline-offset:3px;
+}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--gold)}
 
 /* NAV */
@@ -158,16 +168,31 @@ section{padding:90px 20px}
 .lb-row{
   display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;
   padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.04);
-  font-size:13px;animation:fadein .35s ease;
+  font-size:13px;
 }
 .lb-row:hover{background:rgba(240,180,41,.04)}
+.lb-row.fresh{animation:fadein .35s ease}
+.lb-row.you{background:rgba(240,180,41,.08);border-left:3px solid var(--gold);padding-left:6px}
 .lb-rank{font-family:var(--font-pixel);font-size:8px;color:var(--muted)}
 .lb-row.top .lb-rank{color:var(--gold)}
 .lb-name{font-family:var(--font-pixel);font-size:8px;color:#fff;letter-spacing:.5px}
+.lb-name .you-tag{color:var(--gold);font-size:6px;margin-left:6px}
 .lb-meta{font-size:11px;color:var(--muted);margin-top:3px}
 .lb-score{font-family:var(--font-pixel);font-size:8px;color:var(--mint);text-align:right}
 .lb-empty{color:var(--muted);font-size:13px;padding:24px 8px;text-align:center}
 .lb-foot{margin-top:12px;font-size:11px;color:#555;line-height:1.5}
+.lb-recent{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.lb-recent h4{font-family:var(--font-pixel);font-size:7px;color:var(--amber);margin-bottom:10px;letter-spacing:1px}
+.recent-row{display:flex;justify-content:space-between;gap:8px;padding:6px 4px;font-size:12px;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03)}
+.recent-row b{color:#ddd;font-family:var(--font-pixel);font-size:7px;font-weight:400}
+.recent-row span{color:var(--mint);font-family:var(--font-pixel);font-size:7px}
+.lb-youbar{
+  margin-top:10px;padding:10px;border:1px dashed rgba(240,180,41,.35);
+  font-family:var(--font-pixel);font-size:7px;color:var(--gold);line-height:1.7;
+  display:none;
+}
+.lb-youbar.show{display:block}
+.ticker-wrap:hover .ticker{animation-play-state:paused}
 
 /* TOKEN / ROADMAP */
 #tokenomics{background:var(--panel)}
@@ -210,7 +235,7 @@ section{padding:90px 20px}
   cursor:pointer;display:flex;justify-content:space-between;gap:12px;user-select:none;
 }
 .fa{max-height:0;overflow:hidden;font-size:13px;color:var(--muted);line-height:1.7;transition:max-height .35s}
-.fi.open .fa{max-height:160px;padding-bottom:14px}
+.fi.open .fa{max-height:320px;padding-bottom:14px}
 
 footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040a}
 .foot{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -234,6 +259,11 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   .nav-links,.nav-cta{display:none}#burger{display:flex}
   .phases,.stats{grid-template-columns:1fr}
   .hero-actions{flex-direction:column;align-items:center}
+  nav{padding-top:max(14px,env(safe-area-inset-top))}
+}
+@media(prefers-reduced-motion:reduce){
+  .ticker,.hero-chip,.hero-brand,.hero-line,.hero-sub,.hero-actions,.scroll-cue{animation:none !important}
+  .lb-row.fresh{animation:none}
 }
 </style>
 </head>
@@ -298,11 +328,11 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     <p class="desc">Enter a username in-game, clear levels, and your best run syncs to the live board on this page.</p>
     <div class="play-grid">
       <div class="game-shell">
-        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2</span></div>
-        <iframe src="super-solario-game.html" title="Super Solario Bros" allow="autoplay"></iframe>
+        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2.1</span></div>
+        <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario Bros" allow="autoplay" loading="lazy"></iframe>
         <div class="game-note">
           Or <a href="super-solario-game.html" target="_blank" rel="noopener">open full screen</a>
-          · ← → move · space jump · P pause
+          · ← → move · space jump · P pause · M mute
         </div>
       </div>
       <aside class="lb-panel" id="leaderboard">
@@ -311,7 +341,12 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
           <div class="lb-live"><i></i> LIVE</div>
         </div>
         <ol class="lb-list" id="lbList"></ol>
-        <p class="lb-foot">Scores update instantly when you finish a run. Best score per username is kept. Stored in this browser and synced across tabs.</p>
+        <div class="lb-youbar" id="lbYou"></div>
+        <div class="lb-recent">
+          <h4>LATEST RUNS</h4>
+          <div id="lbRecent"></div>
+        </div>
+        <p class="lb-foot">Best score per username. Board + recent runs update live when you finish — synced across tabs on this device.</p>
       </aside>
     </div>
   </div>
@@ -326,7 +361,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <div class="stat"><strong>1B</strong><span>TOTAL SUPPLY</span></div>
       <div class="stat"><strong>5%</strong><span>TAX</span></div>
       <div class="stat"><strong>2YR</strong><span>LP LOCK</span></div>
-      <div class="stat"><strong>🔒</strong><span>RENOUNCED</span></div>
+      <div class="stat"><strong>YES</strong><span>RENOUNCED</span></div>
     </div>
     <div class="split">
       <div class="piece"><b>40%</b><em>PUBLIC SALE</em><p>Fair launch. First come, first moon.</p></div>
@@ -412,50 +447,131 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
 
 <script>
 (function () {
-  // Leaderboard renderer
   const list = document.getElementById('lbList');
-  function renderBoard(scores) {
-    const rows = scores || SolarioLB.getScores();
+  const recentEl = document.getElementById('lbRecent');
+  const youEl = document.getElementById('lbYou');
+  let firstPaint = true;
+  let knownTs = new Set();
+
+  function renderRecent(recent) {
+    const rows = recent || SolarioLB.getRecent(8);
     if (!rows.length) {
-      list.innerHTML = '<li class="lb-empty">No scores yet — be the first moon mission.</li>';
+      recentEl.innerHTML = '<div class="recent-row"><span>No runs yet — launch the game.</span></div>';
       return;
     }
-    list.innerHTML = rows.slice(0, 15).map((r, i) => `
-      <li class="lb-row ${i < 3 ? 'top' : ''}">
-        <span class="lb-rank">#${i + 1}</span>
-        <div>
-          <div class="lb-name">${r.name}</div>
-          <div class="lb-meta">Lv ${r.level} · ${r.coins} coins · ${SolarioLB.timeAgo(r.ts)}</div>
-        </div>
-        <div class="lb-score">${SolarioLB.formatScore(r.score)}</div>
-      </li>`).join('');
+    recentEl.innerHTML = rows.map(r => `
+      <div class="recent-row">
+        <div><b>${r.name}</b> · Lv ${r.level} · ${SolarioLB.timeAgo(r.ts)}</div>
+        <span>${SolarioLB.formatScore(r.score)}</span>
+      </div>`).join('');
   }
-  renderBoard();
-  SolarioLB.onUpdate(renderBoard);
-  // Refresh relative times
-  setInterval(() => renderBoard(), 15000);
 
-  // Messages from game iframe
+  function renderYou(scores) {
+    const me = SolarioLB.getUsername();
+    if (!me) { youEl.classList.remove('show'); youEl.innerHTML = ''; return; }
+    const rows = scores || SolarioLB.getScores();
+    const idx = rows.findIndex(r => r.name === me);
+    if (idx < 0) {
+      youEl.classList.add('show');
+      youEl.innerHTML = `YOU · ${me}<br><span style="color:#888">No score yet — finish a run to place.</span>`;
+      return;
+    }
+    const r = rows[idx];
+    youEl.classList.add('show');
+    youEl.innerHTML = `YOU · ${me} · RANK #${idx + 1} · <span style="color:var(--mint)">${SolarioLB.formatScore(r.score)}</span><br>Lv ${r.level} · ${r.coins} coins`;
+  }
+
+  function renderBoard(scores, recent) {
+    const rows = scores || SolarioLB.getScores();
+    const me = SolarioLB.getUsername();
+    if (!rows.length) {
+      list.innerHTML = '<li class="lb-empty">No scores yet — be the first moon mission.</li>';
+    } else {
+      list.innerHTML = rows.slice(0, 15).map((r, i) => {
+        const isYou = me && r.name === me;
+        const fresh = !firstPaint && r.ts && !knownTs.has(r.ts + ':' + r.name);
+        return `
+        <li class="lb-row ${i < 3 ? 'top' : ''} ${isYou ? 'you' : ''} ${fresh ? 'fresh' : ''}">
+          <span class="lb-rank">#${i + 1}</span>
+          <div>
+            <div class="lb-name">${r.name}${isYou ? '<span class="you-tag">YOU</span>' : ''}</div>
+            <div class="lb-meta" data-ts="${r.ts}">Lv ${r.level} · ${r.coins} coins · ${SolarioLB.timeAgo(r.ts)}</div>
+          </div>
+          <div class="lb-score">${SolarioLB.formatScore(r.score)}</div>
+        </li>`;
+      }).join('');
+      knownTs = new Set(rows.map(r => r.ts + ':' + r.name));
+    }
+    firstPaint = false;
+    renderYou(rows);
+    renderRecent(recent);
+    updateTicker(rows);
+  }
+
+  function updateTicker(scores) {
+    const el = document.getElementById('ticker');
+    if (!el) return;
+    const top = (scores || SolarioLB.getScores()).slice(0, 3);
+    const recent = SolarioLB.getRecent(1)[0];
+    const bits = [
+      '$SOLARIO <span class="up">+420.69%</span>',
+      'GAME ONLINE',
+      'LEADERBOARD LIVE',
+      ...top.map((r, i) => `#${i + 1} ${r.name} ${SolarioLB.formatScore(r.score)}`),
+      recent ? `LATEST ${recent.name} ${SolarioLB.formatScore(recent.score)}` : 'BEARS <span class="dn">REKT</span>',
+      'BEARS <span class="dn">REKT</span>',
+      'SUPPLY 1B',
+      'LP LOCKED 2YR',
+      'DIAMOND HANDS ONLY'
+    ];
+    const html = bits.map(b => `<span>${b}</span>`).join('') + bits.map(b => `<span>${b}</span>`).join('');
+    if (el.dataset.sig !== html) {
+      el.dataset.sig = html;
+      el.innerHTML = html;
+    }
+  }
+
+  function refreshTimesOnly() {
+    list.querySelectorAll('.lb-row').forEach(row => {
+      const meta = row.querySelector('.lb-meta');
+      if (!meta || !meta.dataset.ts) return;
+      const bits = meta.textContent.split(' · ');
+      const prefix = bits.length >= 2 ? bits[0] + ' · ' + bits[1] : meta.textContent;
+      meta.textContent = prefix + ' · ' + SolarioLB.timeAgo(Number(meta.dataset.ts));
+    });
+    renderRecent();
+    renderYou();
+  }
+
+  renderBoard();
+  SolarioLB.onUpdate((scores, recent) => renderBoard(scores, recent));
+  setInterval(refreshTimesOnly, 15000);
+
   window.addEventListener('message', (e) => {
     if (!e.data || typeof e.data !== 'object') return;
-    if (e.data.type === 'solario-score') renderBoard(e.data.payload && e.data.payload.scores);
+    if (e.data.type === 'solario-score') {
+      const p = e.data.payload || {};
+      renderBoard(p.scores, p.recent);
+    }
     if (e.data.type === 'solario-scroll-lb') {
       document.getElementById('leaderboard').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
 
-  // Hero canvas: candles + stars
+  // Hero canvas — pause when offscreen / hidden / reduced motion
   const hc = document.getElementById('heroCanvas');
-  const hx = hc.getContext('2d');
-  let stars = [], candles = [];
+  const hx = hc.getContext('2d', { alpha: false });
+  let stars = [], candles = [], heroOn = true, heroVisible = true, heroRaf = 0, resizeT = 0;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function sizeHero() {
-    hc.width = innerWidth; hc.height = innerHeight;
-    stars = Array.from({ length: 90 }, () => ({
+    hc.width = innerWidth; hc.height = Math.min(innerHeight, document.getElementById('hero').offsetHeight || innerHeight);
+    stars = Array.from({ length: reduceMotion ? 40 : 90 }, () => ({
       x: Math.random() * hc.width, y: Math.random() * hc.height,
       r: Math.random() * 1.6 + 0.2, a: Math.random() * 6
     }));
-    candles = Array.from({ length: 18 }, (_, i) => ({
-      x: (i + 0.5) * (hc.width / 18),
+    candles = Array.from({ length: reduceMotion ? 10 : 18 }, (_, i) => ({
+      x: (i + 0.5) * (hc.width / (reduceMotion ? 10 : 18)),
       h: 40 + Math.random() * 120,
       w: 8 + Math.random() * 10,
       up: Math.random() > 0.4,
@@ -463,29 +579,65 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     }));
   }
   sizeHero();
-  addEventListener('resize', sizeHero);
-  (function heroLoop(t) {
+  addEventListener('resize', () => {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(sizeHero, 150);
+  });
+
+  function drawHero(t) {
     hx.clearRect(0, 0, hc.width, hc.height);
     for (const s of stars) {
-      hx.globalAlpha = 0.3 + 0.7 * Math.abs(Math.sin(t * 0.001 + s.a));
+      hx.globalAlpha = reduceMotion ? 0.5 : (0.3 + 0.7 * Math.abs(Math.sin(t * 0.001 + s.a)));
       hx.fillStyle = '#fff';
       hx.beginPath(); hx.arc(s.x, s.y, s.r, 0, Math.PI * 2); hx.fill();
     }
     hx.globalAlpha = 0.16;
     const baseY = hc.height * 0.72;
     for (const c of candles) {
-      const pulse = Math.sin(t * 0.001 + c.phase) * 10;
+      const pulse = reduceMotion ? 0 : Math.sin(t * 0.001 + c.phase) * 10;
       const h = c.h + pulse;
       hx.fillStyle = c.up ? '#19f5a0' : '#ff3b5c';
       hx.fillRect(c.x - 1, baseY - h - 12, 2, h + 24);
       hx.fillRect(c.x - c.w / 2, baseY - h, c.w, h * 0.55);
     }
     hx.globalAlpha = 1;
-    requestAnimationFrame(heroLoop);
-  })(0);
+  }
 
-  // Expose for tests
-  window.__SOLARIO_SITE__ = { renderBoard, getScores: () => SolarioLB.getScores() };
+  function heroLoop(t) {
+    if (heroOn && heroVisible && !document.hidden && !reduceMotion) {
+      drawHero(t);
+      heroRaf = requestAnimationFrame(heroLoop);
+    } else {
+      heroRaf = 0;
+      if (reduceMotion) drawHero(0);
+    }
+  }
+  function ensureHero() {
+    if (!heroRaf && heroOn && heroVisible && !document.hidden && !reduceMotion) {
+      heroRaf = requestAnimationFrame(heroLoop);
+    }
+  }
+  if (reduceMotion) drawHero(0);
+  else heroRaf = requestAnimationFrame(heroLoop);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { if (heroRaf) cancelAnimationFrame(heroRaf); heroRaf = 0; }
+    else ensureHero();
+  });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      heroVisible = entries.some(e => e.isIntersecting);
+      if (heroVisible) ensureHero();
+      else if (heroRaf) { cancelAnimationFrame(heroRaf); heroRaf = 0; }
+    }, { threshold: 0.05 }).observe(document.getElementById('hero'));
+  }
+
+  window.__SOLARIO_SITE__ = {
+    renderBoard,
+    getScores: () => SolarioLB.getScores(),
+    getRecent: () => SolarioLB.getRecent(),
+    getTop: () => SolarioLB.getTop(3)
+  };
 })();
 </script>
 </body>

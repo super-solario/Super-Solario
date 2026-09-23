@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Super Solario Bros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <script src="leaderboard.js"></script>
 <style>
@@ -16,10 +18,12 @@ html,body{width:100%;height:100%;background:var(--ink);overflow:hidden;touch-act
 #shell{display:flex;flex-direction:column;width:100%;height:100vh;max-width:960px;margin:0 auto;background:radial-gradient(ellipse at 50% 0%,#1a1430 0%,var(--ink) 60%)}
 #hud{
   display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
-  padding:8px 12px;border-bottom:2px solid var(--gold);
+  padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));
+  border-bottom:2px solid var(--gold);
   background:linear-gradient(90deg,#080812,#16102a,#080812);
   font-family:'Press Start 2P',monospace;flex-shrink:0;
 }
+#hud.flash .hv{color:var(--mint);transition:color .15s}
 .hb{display:flex;flex-direction:column;gap:3px;min-width:0}
 .hl{font-size:6px;color:var(--muted);letter-spacing:1px}
 .hv{font-size:clamp(8px,1.5vw,11px);color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -59,18 +63,28 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
 .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #7a3d00}
 .btn.ghost{background:transparent;color:var(--gold);border:2px solid var(--gold);box-shadow:none}
 .hint{font-size:6px;color:#666;letter-spacing:1px}
+.best{font-size:7px;color:var(--mint);letter-spacing:1px;margin-top:2px}
+#progress{
+  position:absolute;left:10px;right:10px;bottom:10px;height:4px;z-index:4;
+  background:rgba(255,255,255,.08);border:1px solid rgba(240,180,41,.25);
+  pointer-events:none;opacity:0;transition:opacity .2s;
+}
+#progress.show{opacity:1}
+#progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--mint));transition:width .08s linear}
 #toast{
   position:absolute;top:12%;left:50%;transform:translateX(-50%);
   background:rgba(0,0,0,.92);border:2px solid var(--gold);color:var(--gold);
   font-family:'Press Start 2P',monospace;font-size:7px;padding:8px 14px;
   opacity:0;transition:opacity .2s;pointer-events:none;z-index:8;white-space:nowrap;
+  max-width:90%;overflow:hidden;text-overflow:ellipsis;
 }
 #mobile{
   display:none;justify-content:space-between;align-items:center;
-  padding:10px 14px;border-top:2px solid var(--gold);
+  padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));
+  border-top:2px solid var(--gold);
   background:linear-gradient(90deg,#080812,#16102a);
 }
-.pad{display:flex;gap:10px}
+.pad{display:flex;gap:10px;align-items:center}
 .k{
   width:58px;height:58px;border:2px solid var(--gold);border-radius:10px;
   background:rgba(240,180,41,.1);color:var(--gold);font-size:20px;
@@ -79,8 +93,12 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
 }
 .k.on,.k:active{transform:translateY(2px);box-shadow:0 1px 0 #7a6000;background:rgba(240,180,41,.35)}
 .kj{width:70px;height:70px;border-radius:50%;border-color:var(--amber);color:var(--amber);font-size:9px;background:rgba(255,138,0,.15)}
+.ks{width:48px;height:48px;font-size:8px;border-radius:8px}
+#scan{pointer-events:none;position:absolute;inset:0;z-index:3;
+  background:repeating-linear-gradient(to bottom,transparent 0 3px,rgba(0,0,0,.045) 3px 4px);opacity:.7}
 @media(max-width:820px),(pointer:coarse){#mobile{display:flex}}
-@media(max-height:500px){.k{width:44px;height:44px}.kj{width:54px;height:54px}}
+@media(max-height:500px){.k{width:44px;height:44px}.kj{width:54px;height:54px}.ks{width:40px;height:40px}}
+@media(prefers-reduced-motion:reduce){#scan{display:none}#hud.flash .hv{transition:none}}
 </style>
 </head>
 <body>
@@ -94,16 +112,19 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
   </div>
   <div id="stage">
     <canvas id="c"></canvas>
+    <div id="scan" aria-hidden="true"></div>
+    <div id="progress" aria-hidden="true"><i id="progFill"></i></div>
     <div id="toast"></div>
     <div id="overlay">
-      <div class="logo">🌙 SUPER<br>SOLARIO</div>
+      <div class="logo">SUPER<br>SOLARIO</div>
       <div class="sub">ON-CHAIN PLATFORMER</div>
       <div class="blurb">Enter a wallet alias, then stomp bears &amp; stack <b>$SOLARIO</b>.<br>Top scores hit the live leaderboard.</div>
+      <div class="best" id="bestLine"></div>
       <input id="uname" maxlength="12" placeholder="USERNAME" autocomplete="off" spellcheck="false">
       <div class="row">
         <button class="btn" id="btnStart">LAUNCH</button>
       </div>
-      <div class="hint">← → MOVE · SPACE JUMP · P PAUSE</div>
+      <div class="hint">← → MOVE · SPACE JUMP · P PAUSE · M MUTE</div>
     </div>
   </div>
   <div id="mobile">
@@ -112,6 +133,8 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
       <div class="k" id="btnR">▶</div>
     </div>
     <div class="pad">
+      <div class="k ks" id="btnMute" title="Mute">SND</div>
+      <div class="k ks" id="btnPause" title="Pause">II</div>
       <div class="k kj" id="btnJ">JUMP</div>
     </div>
   </div>
@@ -121,36 +144,50 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
 'use strict';
 
 const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: false });
 const stage = document.getElementById('stage');
 const overlay = document.getElementById('overlay');
 const toastEl = document.getElementById('toast');
 const unameIn = document.getElementById('uname');
+const progEl = document.getElementById('progress');
+const progFill = document.getElementById('progFill');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const T = 32;
 const GRAV = 0.55;
 const MAX_FALL = 14;
 const W = () => canvas.width;
 const H = () => canvas.height;
+const MUTE_KEY = 'solario_muted';
 
 let username = (window.SolarioLB && SolarioLB.getUsername()) || '';
 unameIn.value = username;
 
+let resizeTimer = 0, lastH = 0, bgCache = null, bgKey = '';
 function resize() {
   const r = stage.getBoundingClientRect();
+  const nh = Math.max(300, Math.round(900 * (r.height / Math.max(1, r.width))));
+  if (Math.abs(nh - lastH) < 3 && canvas.width === 900) return;
+  lastH = nh;
   canvas.width = 900;
-  canvas.height = Math.max(300, Math.round(900 * (r.height / Math.max(1, r.width))));
+  canvas.height = nh;
+  bgCache = null;
 }
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(resize, 120);
+});
 
 // ── Audio ────────────────────────────────────────────────
-let AC = null;
+let AC = null, muted = false;
+try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) {}
 function ac() {
   if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
   return AC;
 }
 function beep(f, d = 0.08, type = 'square', v = 0.07, delay = 0, slide = 0) {
+  if (muted) return;
   const a = ac(); if (!a) return;
   const t0 = a.currentTime + delay;
   const o = a.createOscillator(), g = a.createGain();
@@ -164,12 +201,24 @@ function beep(f, d = 0.08, type = 'square', v = 0.07, delay = 0, slide = 0) {
 const sfx = {
   jump: () => { beep(300, 0.06); beep(460, 0.08, 'square', 0.05, 0.04); },
   coin: () => { beep(900, 0.05); beep(1300, 0.09, 'square', 0.05, 0.04); },
-  stomp: () => beep(180, 0.1, 'triangle', 0.09, 0, -60),
+  stomp: (n) => beep(180 + Math.min(5, n || 1) * 28, 0.1, 'triangle', 0.09, 0, -60),
   hurt: () => { beep(240, 0.1, 'sawtooth', 0.07); beep(120, 0.16, 'sawtooth', 0.05, 0.05); },
   win: () => { beep(523, 0.1); beep(659, 0.1, 'square', 0.06, 0.1); beep(784, 0.16, 'square', 0.07, 0.2); },
   power: () => { beep(440, 0.07); beep(660, 0.09, 'square', 0.05, 0.06); },
-  die: () => { beep(280, 0.12, 'sawtooth', 0.07); beep(140, 0.22, 'sawtooth', 0.06, 0.08, -100); }
+  die: () => { beep(280, 0.12, 'sawtooth', 0.07); beep(140, 0.22, 'sawtooth', 0.06, 0.08, -100); },
+  best: () => { beep(660, 0.08); beep(880, 0.1, 'square', 0.06, 0.07); beep(1175, 0.14, 'square', 0.07, 0.14); }
 };
+
+function setMuted(v) {
+  muted = !!v;
+  try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (e) {}
+  const btn = document.getElementById('btnMute');
+  if (btn) {
+    btn.textContent = muted ? 'MUT' : 'SND';
+    btn.classList.toggle('on', muted);
+  }
+  if (!muted) { const a = ac(); if (a && a.state === 'suspended') a.resume(); }
+}
 
 // ── Input ────────────────────────────────────────────────
 const keys = Object.create(null);
@@ -179,12 +228,14 @@ window.addEventListener('keydown', e => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (AC && AC.state === 'suspended') AC.resume();
   if (e.code === 'KeyP' || e.code === 'Escape') togglePause();
+  if (e.code === 'KeyM') setMuted(!muted);
   if ((e.code === 'Enter' || e.code === 'Space') && (state === 'entry' || state === 'over' || state === 'clear')) {
     e.preventDefault();
     if (state === 'entry') startFromOverlay();
     else if (state === 'over') showEntry();
     else if (state === 'clear') nextLevel();
   }
+  if (e.code === 'KeyR' && state === 'over') { e.preventDefault(); showEntry(); }
 });
 window.addEventListener('keyup', e => setKey(e.code, false));
 window.addEventListener('pointerdown', () => { const a = ac(); if (a && a.state === 'suspended') a.resume(); });
@@ -193,12 +244,18 @@ function bindPad(id, code) {
   const el = document.getElementById(id);
   const on = e => { e.preventDefault(); setKey(code, true); el.classList.add('on'); };
   const off = e => { e.preventDefault(); setKey(code, false); el.classList.remove('on'); };
-  ['touchstart', 'mousedown'].forEach(ev => el.addEventListener(ev, on));
+  ['touchstart', 'mousedown'].forEach(ev => el.addEventListener(ev, on, { passive: false }));
   ['touchend', 'touchcancel', 'mouseup', 'mouseleave'].forEach(ev => el.addEventListener(ev, off));
 }
 bindPad('btnL', 'ArrowLeft');
 bindPad('btnR', 'ArrowRight');
 bindPad('btnJ', 'Space');
+document.getElementById('btnPause').addEventListener('click', e => { e.preventDefault(); togglePause(); });
+document.getElementById('btnMute').addEventListener('click', e => {
+  e.preventDefault();
+  setMuted(!muted);
+});
+setMuted(muted);
 
 const left = () => keys.ArrowLeft || keys.KeyA;
 const right = () => keys.ArrowRight || keys.KeyD;
@@ -208,13 +265,29 @@ const jump = () => keys.Space || keys.ArrowUp || keys.KeyW;
 let state = 'entry'; // entry|play|pause|dead|over|clear|pole
 let score = 0, lives = 3, coins = 0, level = 1;
 let camX = 0, camY = 0, shakeT = 0, shakeX = 0, shakeY = 0;
-let frame = 0, last = 0, raf = 0;
+let frame = 0, last = 0, raf = 0, needsPaint = true;
 let world = null, player = null;
 let particles = [], floaters = [];
+const particlePool = [];
 let combo = 0, comboT = 0, toastT = 0;
 let checkpoint = { set: false, x: 64, y: 0 };
 let poleT = 0;
 let submitted = false;
+let personalBest = 0, beatBest = false, hudFlashT = 0;
+const FLOATER_CAP = 24;
+const PARTICLE_CAP = reduceMotion ? 40 : 80;
+
+function refreshBestLine() {
+  const el = document.getElementById('bestLine');
+  if (!el || !window.SolarioLB) return;
+  const me = SolarioLB.getUsername() || username;
+  const pb = me ? SolarioLB.getPersonalBest(me) : 0;
+  const top = SolarioLB.getTop(1)[0];
+  if (pb > 0) el.textContent = `YOUR BEST · ${SolarioLB.formatScore(pb)}`;
+  else if (top) el.textContent = `BOARD LEADER · ${top.name} ${SolarioLB.formatScore(top.score)}`;
+  else el.textContent = '';
+}
+refreshBestLine();
 
 function hud() {
   document.getElementById('hName').textContent = username || '---';
@@ -222,6 +295,7 @@ function hud() {
   document.getElementById('hLives').textContent = '🌙'.repeat(Math.max(0, lives)) || '—';
   document.getElementById('hLevel').textContent = String(level);
   document.getElementById('hCoins').textContent = String(coins);
+  if (hudFlashT > 0) document.getElementById('hud').classList.add('flash');
 }
 
 function toast(msg) {
@@ -230,17 +304,40 @@ function toast(msg) {
   toastT = 90;
 }
 
+function addScore(n, x, y, label, color) {
+  if (!n) return;
+  score += n;
+  hudFlashT = 18;
+  document.getElementById('hud').classList.add('flash');
+  if (label) floater(x, y, label, color);
+  if (!beatBest && personalBest > 0 && score > personalBest) {
+    beatBest = true;
+    toast('NEW PERSONAL BEST');
+    sfx.best();
+  }
+  hud();
+}
+
 function burst(x, y, color, n, spdMul) {
   n = (n == null) ? 10 : n;
+  if (reduceMotion) n = Math.ceil(n * 0.45);
   spdMul = (spdMul == null) ? 1 : spdMul;
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2;
     const s = (1.5 + Math.random() * 3) * spdMul;
-    particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2, life: 1, fade: 0.03, color, r: 1.5 + Math.random() * 2 });
+    const p = particlePool.pop() || {};
+    p.x = x; p.y = y; p.vx = Math.cos(a) * s; p.vy = Math.sin(a) * s - 2;
+    p.life = 1; p.fade = 0.03; p.color = color; p.r = 1.5 + Math.random() * 2;
+    particles.push(p);
+  }
+  while (particles.length > PARTICLE_CAP) {
+    const old = particles.shift();
+    if (old) particlePool.push(old);
   }
 }
 function floater(x, y, text, color = '#ffd700') {
   floaters.push({ x, y, text, color, life: 1, vy: -1.2 });
+  if (floaters.length > FLOATER_CAP) floaters.shift();
 }
 
 // ── Themes & levels ──────────────────────────────────────
@@ -380,9 +477,10 @@ function resolvePlayer(dt) {
 }
 
 function hitQ(p) {
-  sfx.coin();
   if (p.content === 'coin') {
-    score += 50; coins++; burst(p.x + 16, p.y, '#ffd700', 10); floater(p.x + 16, p.y - 8, '+50');
+    sfx.coin();
+    addScore(50, p.x + 16, p.y - 8, '+50');
+    coins++; burst(p.x + 16, p.y, '#ffd700', 10); hud();
   } else if (p.content === 'shroom') {
     world.powerups.push({ x: p.x + 8, y: p.y - 20, t: 'shroom', vx: 1.5, vy: -3, dead: false });
     sfx.power();
@@ -390,7 +488,6 @@ function hitQ(p) {
     world.powerups.push({ x: p.x + 8, y: p.y - 20, t: 'star', vx: 1.2, vy: -4, dead: false });
     sfx.power();
   }
-  hud();
 }
 
 function resolveEnemy(e, dt) {
@@ -442,12 +539,16 @@ function loadLevel() {
     for (const c of world.checkpoints) if (c.x <= checkpoint.x) c.got = true;
   }
   player = makePlayer();
-  particles = []; floaters = [];
+  while (particles.length) { const p = particles.pop(); if (p) particlePool.push(p); }
+  floaters = [];
   camX = Math.max(0, player.x - W() / 3); camY = 0;
   frame = 0; combo = 0; comboT = 0;
+  bgCache = null;
   clearJump();
   hud();
   toast(world.theme.name);
+  progEl.classList.add('show');
+  needsPaint = true;
 }
 
 function startFromOverlay() {
@@ -467,6 +568,8 @@ function startFromOverlay() {
     return;
   }
   username = name;
+  personalBest = window.SolarioLB ? SolarioLB.getPersonalBest(username) : 0;
+  beatBest = false;
   score = 0; lives = 3; coins = 0; level = 1;
   checkpoint = { set: false, x: 64, y: 0 };
   submitted = false;
@@ -479,46 +582,68 @@ function startFromOverlay() {
 
 function showEntry() {
   state = 'entry';
+  progEl.classList.remove('show');
   overlay.classList.remove('hidden');
   overlay.innerHTML = `
-    <div class="logo">🌙 SUPER<br>SOLARIO</div>
+    <div class="logo">SUPER<br>SOLARIO</div>
     <div class="sub">ON-CHAIN PLATFORMER</div>
     <div class="blurb">Enter a wallet alias, then stomp bears &amp; stack <b>$SOLARIO</b>.<br>Top scores hit the live leaderboard.</div>
+    <div class="best" id="bestLine"></div>
     <input id="uname" maxlength="12" placeholder="USERNAME" autocomplete="off" spellcheck="false" value="${username}">
     <div class="row"><button class="btn" id="btnStart">LAUNCH</button></div>
-    <div class="hint">← → MOVE · SPACE JUMP · P PAUSE</div>`;
+    <div class="hint">← → MOVE · SPACE JUMP · P PAUSE · M MUTE</div>`;
+  refreshBestLine();
   const input = document.getElementById('uname');
   const btn = document.getElementById('btnStart');
   btn.onclick = startFromOverlay;
   input.addEventListener('keydown', e => { if (e.key === 'Enter') startFromOverlay(); });
   input.focus();
+  needsPaint = true;
 }
 
-function submitToBoard() {
-  if (submitted || score <= 0 || !username) return;
+function submitToBoard(force) {
+  if (!force && submitted) return null;
+  if (score <= 0 || !username) return null;
   submitted = true;
-  if (!window.SolarioLB) return;
+  if (!window.SolarioLB) return null;
   const res = SolarioLB.submitScore({ name: username, score, coins, level });
   try {
     parent.postMessage({ type: 'solario-score', payload: res }, '*');
   } catch (e) {}
-  if (res.ok) toast(res.improved ? `LEADERBOARD #${res.rank}` : 'SCORE SAVED');
+  if (res && res.ok) toast(res.improved ? `BOARD #${res.rank}` : 'BEST KEPT');
+  return res;
+}
+
+async function doShare(rank) {
+  if (!window.SolarioLB) return;
+  const res = await SolarioLB.shareScore({ name: username, score, coins, level, rank });
+  if (res.ok) toast(res.method === 'share' ? 'SHARED' : 'COPIED');
+  else if (res.reason !== 'abort') toast('COPY FAILED');
+}
+
+function bindShare(btnId, rank) {
+  const b = document.getElementById(btnId);
+  if (b) b.onclick = () => doShare(rank);
 }
 
 function gameOver() {
   state = 'over';
-  submitToBoard();
+  progEl.classList.remove('show');
+  const res = submitToBoard(true);
+  const rank = res && res.rank ? res.rank : (window.SolarioLB ? SolarioLB.getRank(username) : 0);
   overlay.classList.remove('hidden');
   overlay.innerHTML = `
     <div class="logo" style="font-size:clamp(16px,4vw,28px)">REKT</div>
     <div class="sub">PAPER HANDS DETECTED</div>
-    <div class="blurb"><b>${username}</b> scored <b>${score.toLocaleString()}</b><br>${coins} coins · reached level ${level}</div>
+    <div class="blurb"><b>${username}</b> scored <b>${score.toLocaleString()}</b><br>${coins} coins · Lv ${level}${rank ? ` · Rank #${rank}` : ''}${beatBest ? '<br><span style="color:var(--mint)">NEW PERSONAL BEST</span>' : ''}</div>
     <div class="row">
       <button class="btn" id="btnRetry">RETRY</button>
-      <button class="btn ghost" id="btnBoard">LEADERBOARD</button>
+      <button class="btn ghost" id="btnShare">SHARE</button>
+      <button class="btn ghost" id="btnBoard">BOARD</button>
     </div>
-    <div class="hint">ENTER TO RETRY</div>`;
+    <div class="hint">ENTER / R TO RETRY</div>`;
   document.getElementById('btnRetry').onclick = () => showEntry();
+  bindShare('btnShare', rank);
   document.getElementById('btnBoard').onclick = () => {
     try { parent.postMessage({ type: 'solario-scroll-lb' }, '*'); } catch (e) {}
   };
@@ -526,15 +651,22 @@ function gameOver() {
 
 function levelClearUI() {
   state = 'clear';
+  const res = submitToBoard(true);
+  submitted = false; // allow later death submit / higher score
+  const rank = res && res.rank ? res.rank : (window.SolarioLB ? SolarioLB.getRank(username) : 0);
   overlay.classList.remove('hidden');
   const nextTheme = THEMES[level % 4];
   overlay.innerHTML = `
     <div class="logo" style="font-size:clamp(16px,4vw,28px)">LEVEL ${level}<br>CLEARED</div>
     <div class="sub">+${(1200 * level).toLocaleString()} $SOLARIO</div>
-    <div class="blurb">Total <b>${score.toLocaleString()}</b> · Next: ${nextTheme.name}</div>
-    <div class="row"><button class="btn" id="btnNext">NEXT LEVEL</button></div>
+    <div class="blurb">Total <b>${score.toLocaleString()}</b> · Next: ${nextTheme.name}${rank ? ` · Rank #${rank}` : ''}</div>
+    <div class="row">
+      <button class="btn" id="btnNext">NEXT LEVEL</button>
+      <button class="btn ghost" id="btnShare">SHARE</button>
+    </div>
     <div class="hint">ENTER TO CONTINUE</div>`;
   document.getElementById('btnNext').onclick = nextLevel;
+  bindShare('btnShare', rank);
 }
 
 function nextLevel() {
@@ -589,7 +721,7 @@ function update(dt) {
     const bottom = world.GY - player.h;
     player.y = Math.min(bottom, player.y + 3 * dt);
     if (player.y >= bottom - 1 || poleT > 80) {
-      score += 1200 * level; hud();
+      addScore(1200 * level, world.flagX + 12, world.flagY, '+' + (1200 * level));
       sfx.win(); burst(world.flagX + 12, world.flagY, '#ffd700', 28, 1.3);
       setTimeout(levelClearUI, 450);
       state = 'clear';
@@ -679,16 +811,17 @@ function update(dt) {
   if (sy < H() * 0.28) iy = player.y - H() * 0.28;
   else if (sy > H() * 0.72) iy = Math.max(0, player.y - H() * 0.72);
   camY += (Math.max(0, iy) - camY) * 0.14 * dt;
-  if (shakeT > 0) { shakeT--; shakeX = (Math.random() - 0.5) * 5; shakeY = (Math.random() - 0.5) * 5; }
-  else { shakeX = shakeY = 0; }
+  if (shakeT > 0 && !reduceMotion) { shakeT--; shakeX = (Math.random() - 0.5) * 5; shakeY = (Math.random() - 0.5) * 5; }
+  else { shakeX = shakeY = 0; shakeT = 0; }
 
   for (const c of world.coins) {
     if (c.taken) continue;
     c.a += 0.07 * dt;
     if (aabb(player.x, player.y, player.w, player.h, c.x - c.r, c.y - c.r, c.r * 2, c.r * 2)) {
-      c.taken = true; score += 10; coins++;
-      burst(c.x, c.y, '#ffd700', 8); floater(c.x, c.y - 10, '+10');
-      sfx.coin(); hud();
+      c.taken = true; coins++;
+      addScore(10, c.x, c.y - 10, '+10');
+      burst(c.x, c.y, '#ffd700', 8);
+      sfx.coin();
       if (coins % 100 === 0) { lives++; toast('EXTRA LIFE'); hud(); }
     }
   }
@@ -705,13 +838,14 @@ function update(dt) {
     if (aabb(player.x, player.y, player.w, player.h, pu.x, pu.y, 16, 16)) {
       pu.dead = true; sfx.power();
       if (pu.t === 'shroom') {
-        player.power = Math.max(player.power, 1); score += 200;
-        toast('SUPER SOLARIO'); floater(pu.x, pu.y, '+200', '#19f5a0');
+        player.power = Math.max(player.power, 1);
+        addScore(200, pu.x, pu.y, '+200', '#19f5a0');
+        toast('SUPER SOLARIO');
       } else {
-        player.power = 2; player.powerT = 520; score += 500;
-        toast('MOON MODE'); floater(pu.x, pu.y, '+500'); burst(pu.x, pu.y, '#ffd700', 18, 1.4);
+        player.power = 2; player.powerT = 520;
+        addScore(500, pu.x, pu.y, '+500');
+        toast('MOON MODE'); burst(pu.x, pu.y, '#ffd700', 18, 1.4);
       }
-      hud();
     }
   }
 
@@ -723,18 +857,16 @@ function update(dt) {
       if (player.power === 2) {
         e.alive = false; combo++; comboT = 50;
         const pts = 500 * Math.min(combo, 5);
-        score += pts; sfx.stomp(); burst(e.x + 14, e.y + 14, '#ff8a00', 12);
-        floater(e.x + 14, e.y, combo > 1 ? `x${combo} +${pts}` : '+500');
-        hud();
+        addScore(pts, e.x + 14, e.y, combo > 1 ? `x${combo} +${pts}` : '+500');
+        sfx.stomp(combo); burst(e.x + 14, e.y + 14, '#ff8a00', 12);
       } else if (player.vy > 0.8 && player.y + player.h < e.y + e.h * 0.62) {
-        e.hp--; player.vy = -9.2; combo++; comboT = 50; sfx.stomp();
+        e.hp--; player.vy = -9.2; combo++; comboT = 50; sfx.stomp(combo);
         if (e.hp <= 0) {
           e.alive = false; e.sq = 24;
           const pts = 200 * Math.min(combo, 5);
-          score += pts; burst(e.x + 14, e.y + 14, '#ff8a00', 12);
-          floater(e.x + 14, e.y, combo > 1 ? `x${combo} +${pts}` : '+200');
+          addScore(pts, e.x + 14, e.y, combo > 1 ? `x${combo} +${pts}` : '+200');
+          burst(e.x + 14, e.y + 14, '#ff8a00', 12);
         } else { e.flash = 16; e.vx *= -1; floater(e.x + 14, e.y, 'HIT'); }
-        hud();
       } else hurt();
     }
   }
@@ -756,7 +888,10 @@ function tickFx(dt) {
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.x += p.vx * dt; p.y += p.vy * dt; p.vy += GRAV * 0.25 * dt; p.life -= p.fade * dt;
-    if (p.life <= 0) particles.splice(i, 1);
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      if (particlePool.length < 120) particlePool.push(p);
+    }
   }
   for (let i = floaters.length - 1; i >= 0; i--) {
     const f = floaters[i];
@@ -764,19 +899,32 @@ function tickFx(dt) {
     if (f.life <= 0) floaters.splice(i, 1);
   }
   if (toastT > 0) { toastT--; if (toastT <= 0) toastEl.style.opacity = '0'; }
+  if (hudFlashT > 0) {
+    hudFlashT--;
+    if (hudFlashT <= 0) document.getElementById('hud').classList.remove('flash');
+  }
+  if (player && world && (state === 'play' || state === 'pole')) {
+    const pct = Math.max(0, Math.min(1, player.x / Math.max(1, world.flagX)));
+    progFill.style.width = (pct * 100).toFixed(1) + '%';
+  }
 }
 
 // ── Draw ─────────────────────────────────────────────────
 function drawBG() {
   const th = world.theme;
-  const g = ctx.createLinearGradient(0, 0, 0, H());
-  g.addColorStop(0, th.sky[0]); g.addColorStop(1, th.sky[1]);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W(), H());
+  const key = th.name + ':' + W() + 'x' + H();
+  if (!bgCache || bgKey !== key) {
+    bgCache = ctx.createLinearGradient(0, 0, 0, H());
+    bgCache.addColorStop(0, th.sky[0]); bgCache.addColorStop(1, th.sky[1]);
+    bgKey = key;
+  }
+  ctx.fillStyle = bgCache; ctx.fillRect(0, 0, W(), H());
   if (th.stars) {
-    for (let i = 0; i < 80; i++) {
+    const starN = reduceMotion ? 40 : 80;
+    for (let i = 0; i < starN; i++) {
       const x = ((i * 97) - camX * 0.08) % W();
       const y = (i * 53) % (H() * 0.7);
-      ctx.globalAlpha = 0.35 + 0.65 * Math.abs(Math.sin(frame * 0.03 + i));
+      ctx.globalAlpha = reduceMotion ? 0.55 : (0.35 + 0.65 * Math.abs(Math.sin(frame * 0.03 + i)));
       ctx.fillStyle = '#fff';
       ctx.fillRect(x, y, 1 + (i % 2), 1 + (i % 2));
     }
@@ -960,7 +1108,7 @@ function drawWorld() {
     ctx.save();
     ctx.translate(player.x + player.w / 2 - camX, player.y + ht / 2);
     ctx.scale(player.face * stretch, squash);
-    if (moon) { ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 16; }
+    if (moon) { ctx.globalAlpha = 0.95; }
     const leg = player.on ? Math.sin(player.walk * Math.PI) * 6 : (player.vy < 0 ? -2 : 3);
     ctx.fillStyle = moon ? '#fbbf24' : '#1d4ed8';
     ctx.fillRect(-9, ht / 4, 8, 8 + leg); ctx.fillRect(1, ht / 4, 8, 8 - leg);
@@ -978,8 +1126,10 @@ function drawWorld() {
   }
   // particles / floaters
   for (const p of particles) {
+    const sx = p.x - camX;
+    if (sx < -20 || sx > W() + 20) continue;
     ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x - camX, p.y, p.r * p.life, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx, p.y, p.r * p.life, 0, Math.PI * 2); ctx.fill();
   }
   ctx.globalAlpha = 1;
   ctx.textAlign = 'center';
@@ -994,8 +1144,13 @@ function drawWorld() {
 function render() {
   ctx.clearRect(0, 0, W(), H());
   if (!world) {
-    // idle stars
     ctx.fillStyle = '#05051a'; ctx.fillRect(0, 0, W(), H());
+    for (let i = 0; i < 50; i++) {
+      ctx.globalAlpha = 0.3 + 0.5 * Math.abs(Math.sin(frame * 0.02 + i));
+      ctx.fillStyle = '#fff';
+      ctx.fillRect((i * 97) % W(), (i * 53) % H(), 1, 1);
+    }
+    ctx.globalAlpha = 1;
     return;
   }
   ctx.save();
@@ -1008,10 +1163,6 @@ function render() {
   drawWorld();
   ctx.restore();
 
-  // scanlines
-  ctx.fillStyle = 'rgba(0,0,0,.03)';
-  for (let y = 0; y < H(); y += 4) ctx.fillRect(0, y, W(), 2);
-
   if (combo > 1 && state === 'play') {
     ctx.fillStyle = '#ffd700'; ctx.font = "10px 'Press Start 2P'"; ctx.textAlign = 'center';
     ctx.fillText('COMBO x' + combo, W() / 2, 34); ctx.textAlign = 'left';
@@ -1021,7 +1172,7 @@ function render() {
     ctx.fillStyle = '#f0b429'; ctx.font = "16px 'Press Start 2P'"; ctx.textAlign = 'center';
     ctx.fillText('PAUSED', W() / 2, H() / 2 - 8);
     ctx.font = "7px 'Press Start 2P'"; ctx.fillStyle = '#aaa';
-    ctx.fillText('P / ESC TO RESUME', W() / 2, H() / 2 + 18);
+    ctx.fillText('P / ESC TO RESUME · M MUTE', W() / 2, H() / 2 + 18);
     ctx.textAlign = 'left';
   }
   if (frame < 120 && state === 'play') {
@@ -1035,10 +1186,24 @@ function render() {
 function loop(t) {
   const dt = Math.min((t - last) / 16.67, 2.5);
   last = t;
-  update(dt);
-  render();
+  const busy = state === 'play' || state === 'pole' || state === 'dead' ||
+    particles.length > 0 || floaters.length > 0 || toastT > 0 || shakeT > 0 || hudFlashT > 0;
+  if (busy) {
+    update(dt);
+    render();
+    needsPaint = true;
+  } else if (state === 'pause') {
+    if (needsPaint) { render(); needsPaint = false; }
+  } else {
+    frame++;
+    if (needsPaint || frame % 10 === 0) { render(); needsPaint = false; }
+  }
   raf = requestAnimationFrame(loop);
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && state === 'play') { state = 'pause'; needsPaint = true; }
+});
 
 // boot
 document.getElementById('btnStart').onclick = startFromOverlay;
@@ -1055,14 +1220,17 @@ window.__SOLARIO_GAME__ = {
   get level() { return level; },
   get lives() { return lives; },
   get username() { return username; },
+  get muted() { return muted; },
+  get personalBest() { return personalBest; },
   get playerX() { return player ? player.x : 0; },
   get playerY() { return player ? player.y : 0; },
   startFromOverlay,
   togglePause,
   submitToBoard,
   loadLevel,
+  setMuted,
   // test helper: grant points as if collected
-  __debugAddScore(n){ score += n; hud(); }
+  __debugAddScore(n){ addScore(n); }
 };
 })();
 </script>
