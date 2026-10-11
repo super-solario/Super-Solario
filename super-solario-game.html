@@ -418,6 +418,7 @@ const THEMES = [
 ];
 
 function levelPlan(n, gr) {
+  // Platform/Q heights are tuned so a held base jump (~4 tiles) can stair-step every block.
   const plans = [
     {
       w: 68, gaps: [30, 31], cps: [34],
@@ -427,25 +428,28 @@ function levelPlan(n, gr) {
       coins: [[3,1,5],[5,4,4],[11,5,3],[16,4,4],[22,6,3],[34,4,5],[40,6,4],[52,5,3],[62,7,3]]
     },
     {
-      w: 78, gaps: [12,13,24,25,40,41,55,56], cps: [28,52],
-      plats: [[4,4,4],[10,5,3],[15,4,4],[18,7,3],[26,4,5],[32,6,3,1],[38,4,4],[44,6,3],[48,4,4,1],[54,5,3],[60,4,4],[66,5,4],[72,4,3]],
-      qs: [[5,7,'coin'],[11,8,'shroom'],[19,9,'star'],[27,7,'coin'],[39,7,'coin'],[49,8,'shroom'],[61,7,'coin'],[67,8,'star']],
-      enemies: [[8,0],[16,0],[30,1],[38,0],[46,1],[58,0],[70,0]],
-      coins: [[4,5,4],[15,5,4],[26,5,5],[38,5,4],[54,6,3],[66,6,4]]
+      // Level 2 — CRYPTO CITY: low entry stairs, then 2–3 tile steps (was unreachable at dy≥4)
+      w: 80, gaps: [14,15,28,29,44,45,60,61], cps: [26,50],
+      plats: [[3,2,3],[7,3,4],[12,3,3],[16,5,3],[20,4,4],[24,6,3],[30,3,4],[34,5,3,1],[39,4,4],[44,6,3],[48,3,4],[52,5,4],[58,4,3],[62,6,3],[67,3,4],[72,5,3]],
+      qs: [[4,5,'coin'],[8,6,'shroom'],[17,8,'coin'],[25,9,'star'],[31,6,'coin'],[45,9,'shroom'],[53,8,'coin'],[63,9,'star']],
+      enemies: [[10,0],[22,0],[36,1],[42,0],[56,0],[70,0]],
+      coins: [[3,3,3],[7,4,4],[16,6,3],[20,5,4],[30,4,4],[48,4,4],[67,4,4]]
     },
     {
-      w: 88, gaps: [10,11,12,22,23,35,36,37,50,51,64,65,66], cps: [30,58],
-      plats: [[4,4,4],[8,7,3],[14,5,4],[18,8,3,1],[24,4,4],[28,7,3],[32,9,3,1],[38,5,4],[44,8,3],[48,5,4,1],[54,5,4],[60,8,3],[64,11,3,1],[72,5,5],[78,8,3],[82,5,4]],
-      qs: [[5,7,'coin'],[9,10,'shroom'],[25,7,'star'],[39,8,'coin'],[45,11,'shroom'],[55,8,'star'],[73,8,'coin'],[79,11,'shroom']],
-      enemies: [[7,0],[15,1],[26,0],[34,1],[42,0],[52,1],[62,0],[74,0],[80,1]],
-      coins: [[4,5,4],[14,6,4],[24,5,4],[38,6,4],[54,6,4],[72,6,5],[82,6,4]]
+      // Level 3 — DIAMOND PEAKS: stair towers instead of 4-tile walls from ground
+      w: 90, gaps: [12,13,26,27,40,41,42,56,57,72,73], cps: [32,60],
+      plats: [[3,2,3],[6,3,3],[10,4,3],[14,3,4],[18,5,3],[22,4,3],[26,6,3,1],[32,3,4],[36,5,3],[40,7,3],[44,5,4],[50,3,4],[54,5,3,1],[58,4,4],[62,6,3],[66,8,3],[72,4,4],[76,6,3],[80,5,4],[84,3,4]],
+      qs: [[4,5,'coin'],[11,7,'shroom'],[19,8,'star'],[33,6,'coin'],[41,10,'shroom'],[51,6,'coin'],[63,9,'star'],[77,9,'shroom']],
+      enemies: [[8,0],[20,1],[34,0],[46,1],[52,0],[64,0],[78,1],[82,0]],
+      coins: [[3,3,3],[14,4,4],[22,5,3],[32,4,4],[50,4,4],[58,5,4],[72,5,4],[84,4,3]]
     },
     {
-      w: 96, gaps: [8,9,16,17,28,29,30,42,43,54,55,68,69,70,82,83], cps: [32,64],
-      plats: [[3,4,3],[6,7,3],[12,5,4],[15,8,3,1],[20,4,4],[24,8,3],[26,11,3,1],[34,5,4],[38,9,3,1],[44,5,4],[48,8,3],[50,12,3,1],[58,5,4],[62,9,3],[64,13,3,1],[74,5,4],[78,9,3,1],[84,5,4],[90,8,4]],
-      qs: [[4,7,'coin'],[7,10,'shroom'],[13,8,'star'],[21,7,'coin'],[35,8,'shroom'],[45,8,'star'],[59,8,'coin'],[75,8,'star'],[85,8,'shroom'],[91,11,'coin']],
-      enemies: [[12,1],[21,0],[34,0],[40,1],[50,0],[60,0],[66,1],[76,0],[86,1],[92,0]],
-      coins: [[3,5,3],[12,6,4],[20,5,4],[34,6,4],[44,6,4],[58,6,4],[74,6,4],[84,6,4],[90,9,3]]
+      // Level 4 — TO THE MOON: long climb with reachable steps + optional high stars
+      w: 98, gaps: [10,11,22,23,34,35,48,49,50,64,65,78,79], cps: [34,66],
+      plats: [[2,2,3],[5,3,3],[9,4,3],[13,3,4],[17,5,3],[21,4,4],[25,6,3,1],[29,5,3],[35,3,4],[39,5,3],[43,7,3,1],[47,5,4],[53,3,4],[57,5,3],[61,7,3],[65,9,3,1],[69,6,3],[75,3,4],[79,5,3,1],[83,4,4],[87,6,3],[91,5,4]],
+      qs: [[3,5,'coin'],[6,6,'shroom'],[18,8,'star'],[22,7,'coin'],[36,6,'shroom'],[44,10,'star'],[54,6,'coin'],[62,10,'star'],[76,6,'shroom'],[88,9,'coin']],
+      enemies: [[12,1],[20,0],[30,0],[40,1],[52,0],[58,0],[70,1],[80,0],[90,1]],
+      coins: [[2,3,3],[13,4,4],[21,5,4],[35,4,4],[47,6,4],[53,4,4],[75,4,4],[83,5,4],[91,6,3]]
     }
   ];
   return plans[(n - 1) % 4];
@@ -847,7 +851,7 @@ function update(dt) {
   if (player.on) player.coy = 12; else if (player.coy > 0) player.coy--;
   if (jump()) player.jbuf = 10; else if (player.jbuf > 0) player.jbuf--;
   if (player.jbuf > 0 && player.coy > 0) {
-    player.vy = player.power === 2 ? -14.2 : player.power === 1 ? -12.8 : -11.6;
+    player.vy = player.power === 2 ? -14.4 : player.power === 1 ? -13.0 : -12.25;
     player.on = false; player.jbuf = 0; player.coy = 0;
     burst(player.x + 11, player.y + player.h, '#c4b5fd', 7);
     sfx.jump();
@@ -1363,6 +1367,69 @@ window.__SOLARIO_GAME__ = {
   try { on = /(?:^|[?&])debug=1(?:&|$)/.test(location.search); } catch (e) {}
   if (on) {
     window.__SOLARIO_GAME__.__debugAddScore = function (n) { addScore(n); };
+    window.__SOLARIO_GAME__.__debugSetLevel = function (n) {
+      level = Math.max(1, Math.floor(Number(n) || 1));
+      checkpoint = { set: false, x: 64, y: 0 };
+      loadLevel();
+      state = 'play';
+      overlay.classList.add('hidden');
+      pausePanel.classList.remove('show');
+      hud();
+    };
+    window.__SOLARIO_GAME__.__debugJumpHeight = function () {
+      // Peak rise (px) for a fully held base jump — used by reachability tests
+      const v0 = -12.25, g = GRAV;
+      return (v0 * v0) / (2 * g);
+    };
+    window.__SOLARIO_GAME__.__debugLevelReachable = function () {
+      if (!world) return { ok: false };
+      const rise = (12.25 * 12.25) / (2 * GRAV);
+      const bricks = world.plats.filter(p => p.type === 'brick' || p.type === 'q');
+      const groundY = world.GY;
+      // BFS from ground
+      const nodes = [{ x: 64, y: groundY, dy: 0 }];
+      const seen = new Set(['g']);
+      const can = [];
+      for (let n = 0; n < nodes.length; n++) {
+        const cur = nodes[n];
+        for (const p of bricks) {
+          if (p.type !== 'brick') continue;
+          const key = p.x + ':' + p.y;
+          if (seen.has(key)) continue;
+          const dy = (groundY - p.y) / T;
+          const riseNeed = cur.y - p.y; // positive if p is above feet
+          const horiz = Math.abs((p.x + p.w / 2) - cur.x);
+          if (riseNeed <= rise + 10 && horiz < 8 * T) {
+            seen.add(key);
+            nodes.push({ x: p.x + p.w / 2, y: p.y, dy });
+            can.push({ x: p.x / T, dy: Math.round(dy) });
+          } else if (riseNeed < 0 && horiz < 10 * T) {
+            // drop down
+            seen.add(key);
+            nodes.push({ x: p.x + p.w / 2, y: p.y, dy });
+            can.push({ x: p.x / T, dy: Math.round(dy) });
+          }
+        }
+      }
+      const qs = world.plats.filter(p => p.type === 'q');
+      const qOk = qs.map(q => {
+        let ok = false;
+        for (const cur of nodes) {
+          const need = cur.y - (q.y + q.h); // rise to underside
+          const horiz = Math.abs((q.x + 16) - cur.x);
+          if (need <= rise + 10 && need >= -8 && horiz < 6 * T) { ok = true; break; }
+        }
+        return { x: q.x / T, ok, content: q.content };
+      });
+      const brickCount = world.plats.filter(p => p.type === 'brick').length;
+      return {
+        ok: can.length >= Math.min(8, brickCount) && qOk.every(q => q.ok),
+        platsReached: can.length,
+        brickCount,
+        qs: qOk,
+        rise
+      };
+    };
   }
 })();
 })();
