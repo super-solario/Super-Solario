@@ -17,8 +17,8 @@
 html,body{width:100%;height:100%;background:var(--ink);overflow:hidden;touch-action:none;font-family:'Space Grotesk',sans-serif;color:#fff}
 #shell{display:flex;flex-direction:column;width:100%;height:100vh;max-width:960px;margin:0 auto;background:radial-gradient(ellipse at 50% 0%,#1a1430 0%,var(--ink) 60%)}
 #hud{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
-  padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) auto;gap:4px;align-items:center;
+  padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));
   border-bottom:2px solid var(--gold);
   background:linear-gradient(90deg,#080812,#16102a,#080812);
   font-family:'Press Start 2P',monospace;flex-shrink:0;
@@ -27,6 +27,27 @@ html,body{width:100%;height:100%;background:var(--ink);overflow:hidden;touch-act
 .hb{display:flex;flex-direction:column;gap:3px;min-width:0}
 .hl{font-size:6px;color:var(--muted);letter-spacing:1px}
 .hv{font-size:clamp(8px,1.5vw,11px);color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hudTools{display:flex;gap:6px;align-items:center}
+#hudTools button{
+  font-family:'Press Start 2P',monospace;font-size:7px;padding:8px 10px;
+  border:1px solid var(--gold);background:rgba(240,180,41,.08);color:var(--gold);cursor:pointer;
+}
+#hudTools button.on{background:rgba(255,59,92,.2);border-color:var(--danger);color:var(--danger)}
+#hudTools button:hover{background:rgba(240,180,41,.2)}
+#comboBar{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:4;
+  width:min(220px,50%);height:6px;background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.35);
+  opacity:0;pointer-events:none;border-radius:2px;
+}
+#comboBar.show{opacity:1}
+#comboBar > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ffd700,#ff8a00);border-radius:1px}
+#pausePanel{
+  position:absolute;inset:0;z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;background:rgba(0,0,0,.62);font-family:'Press Start 2P',monospace;text-align:center;
+}
+#pausePanel.show{display:flex}
+#pausePanel h2{font-size:clamp(16px,4vw,28px);color:var(--gold)}
+#pausePanel p{font-size:7px;color:#aaa;line-height:2}
 #stage{position:relative;flex:1;overflow:hidden;border-left:2px solid rgba(240,180,41,.35);border-right:2px solid rgba(240,180,41,.35)}
 canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #overlay{
@@ -97,9 +118,14 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
 .ks{width:48px;height:48px;font-size:8px;border-radius:8px}
 #scan{pointer-events:none;position:absolute;inset:0;z-index:3;
   background:repeating-linear-gradient(to bottom,transparent 0 3px,rgba(0,0,0,.045) 3px 4px);opacity:.7}
-@media(max-width:820px),(pointer:coarse){#mobile{display:flex}}
+@media(max-width:820px),(pointer:coarse){
+  #mobile{display:flex}
+  #hud{grid-template-columns:repeat(3,minmax(0,1fr)) auto;row-gap:8px}
+  #hud .hb:nth-child(4),#hud .hb:nth-child(5),#hud .hb:nth-child(6){display:none}
+  #hudTools{grid-column:4}
+}
 @media(max-height:500px){.k{width:44px;height:44px}.kj{width:54px;height:54px}.ks{width:40px;height:40px}}
-@media(prefers-reduced-motion:reduce){#scan{display:none}#hud.flash .hv{transition:none}}
+@media(prefers-reduced-motion:reduce){#scan{display:none}#hud.flash .hv{transition:none}#comboBar{display:none}}
 </style>
 </head>
 <body>
@@ -110,12 +136,26 @@ input#uname:focus{box-shadow:0 0 0 3px rgba(240,180,41,.25)}
     <div class="hb"><span class="hl">LIVES</span><span class="hv" id="hLives">🌙🌙🌙</span></div>
     <div class="hb"><span class="hl">LEVEL</span><span class="hv" id="hLevel">1</span></div>
     <div class="hb"><span class="hl">COINS</span><span class="hv" id="hCoins">0</span></div>
+    <div class="hb"><span class="hl">TIME</span><span class="hv" id="hTime">0:00</span></div>
+    <div id="hudTools">
+      <button type="button" id="hudMute" title="Mute (M)">SND</button>
+      <button type="button" id="hudPause" title="Pause (P)">II</button>
+    </div>
   </div>
   <div id="stage">
     <canvas id="c"></canvas>
     <div id="scan" aria-hidden="true"></div>
+    <div id="comboBar" aria-hidden="true"><i id="comboFill"></i></div>
     <div id="progress" aria-hidden="true"><i id="progFill"></i></div>
     <div id="toast"></div>
+    <div id="pausePanel">
+      <h2>PAUSED</h2>
+      <p>P / ESC TO RESUME · M MUTE</p>
+      <div class="row">
+        <button class="btn" id="btnResume">RESUME</button>
+        <button class="btn ghost" id="btnQuit">QUIT</button>
+      </div>
+    </div>
     <div id="overlay">
       <div class="logo">SUPER<br>SOLARIO</div>
       <div class="sub">BROWSER PLATFORMER</div>
@@ -152,6 +192,9 @@ const toastEl = document.getElementById('toast');
 const unameIn = document.getElementById('uname');
 const progEl = document.getElementById('progress');
 const progFill = document.getElementById('progFill');
+const comboBar = document.getElementById('comboBar');
+const comboFill = document.getElementById('comboFill');
+const pausePanel = document.getElementById('pausePanel');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const T = 32;
@@ -199,25 +242,31 @@ function beep(f, d = 0.08, type = 'square', v = 0.07, delay = 0, slide = 0) {
   o.connect(g); g.connect(a.destination);
   o.start(t0); o.stop(t0 + d + 0.02);
 }
+let coinStreak = 0, coinStreakT = 0;
 const sfx = {
   jump: () => { beep(300, 0.06); beep(460, 0.08, 'square', 0.05, 0.04); },
-  coin: () => { beep(900, 0.05); beep(1300, 0.09, 'square', 0.05, 0.04); },
+  coin: () => {
+    const bump = Math.min(8, coinStreak) * 40;
+    beep(900 + bump, 0.05); beep(1300 + bump, 0.09, 'square', 0.05, 0.04);
+  },
   stomp: (n) => beep(180 + Math.min(5, n || 1) * 28, 0.1, 'triangle', 0.09, 0, -60),
   hurt: () => { beep(240, 0.1, 'sawtooth', 0.07); beep(120, 0.16, 'sawtooth', 0.05, 0.05); },
   win: () => { beep(523, 0.1); beep(659, 0.1, 'square', 0.06, 0.1); beep(784, 0.16, 'square', 0.07, 0.2); },
   power: () => { beep(440, 0.07); beep(660, 0.09, 'square', 0.05, 0.06); },
   die: () => { beep(280, 0.12, 'sawtooth', 0.07); beep(140, 0.22, 'sawtooth', 0.06, 0.08, -100); },
-  best: () => { beep(660, 0.08); beep(880, 0.1, 'square', 0.06, 0.07); beep(1175, 0.14, 'square', 0.07, 0.14); }
+  best: () => { beep(660, 0.08); beep(880, 0.1, 'square', 0.06, 0.07); beep(1175, 0.14, 'square', 0.07, 0.14); },
+  land: () => beep(140, 0.04, 'triangle', 0.04)
 };
 
 function setMuted(v) {
   muted = !!v;
   try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (e) {}
-  const btn = document.getElementById('btnMute');
-  if (btn) {
+  ['btnMute', 'hudMute'].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
     btn.textContent = muted ? 'MUT' : 'SND';
     btn.classList.toggle('on', muted);
-  }
+  });
   if (!muted) { const a = ac(); if (a && a.state === 'suspended') a.resume(); }
 }
 
@@ -252,9 +301,17 @@ bindPad('btnL', 'ArrowLeft');
 bindPad('btnR', 'ArrowRight');
 bindPad('btnJ', 'Space');
 document.getElementById('btnPause').addEventListener('click', e => { e.preventDefault(); togglePause(); });
-document.getElementById('btnMute').addEventListener('click', e => {
+document.getElementById('btnMute').addEventListener('click', e => { e.preventDefault(); setMuted(!muted); });
+document.getElementById('hudPause').addEventListener('click', e => { e.preventDefault(); togglePause(); });
+document.getElementById('hudMute').addEventListener('click', e => { e.preventDefault(); setMuted(!muted); });
+document.getElementById('btnResume').addEventListener('click', e => { e.preventDefault(); if (state === 'pause') togglePause(); });
+document.getElementById('btnQuit').addEventListener('click', e => {
   e.preventDefault();
-  setMuted(!muted);
+  if (state === 'pause') {
+    pausePanel.classList.remove('show');
+    if (score > 0) submitToBoard(true);
+    showEntry();
+  }
 });
 setMuted(muted);
 
@@ -275,8 +332,17 @@ let checkpoint = { set: false, x: 64, y: 0 };
 let poleT = 0;
 let submitted = false;
 let personalBest = 0, beatBest = false, hudFlashT = 0;
+let runFrames = 0, trailT = 0, hurtVignette = 0;
 const FLOATER_CAP = 24;
 const PARTICLE_CAP = reduceMotion ? 40 : 80;
+const COMBO_MAX_T = 50;
+
+function formatTime(frames) {
+  const s = Math.floor(frames / 60);
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return m + ':' + String(r).padStart(2, '0');
+}
 
 function refreshBestLine() {
   const el = document.getElementById('bestLine');
@@ -296,6 +362,8 @@ function hud() {
   document.getElementById('hLives').textContent = '🌙'.repeat(Math.max(0, lives)) || '—';
   document.getElementById('hLevel').textContent = String(level);
   document.getElementById('hCoins').textContent = String(coins);
+  const ht = document.getElementById('hTime');
+  if (ht) ht.textContent = formatTime(runFrames);
   if (hudFlashT > 0) document.getElementById('hud').classList.add('flash');
 }
 
@@ -572,9 +640,11 @@ function startFromOverlay() {
   personalBest = window.SolarioLB ? SolarioLB.getPersonalBest(username) : 0;
   beatBest = false;
   score = 0; lives = 3; coins = 0; level = 1;
+  runFrames = 0; coinStreak = 0; coinStreakT = 0; hurtVignette = 0;
   checkpoint = { set: false, x: 64, y: 0 };
   submitted = false;
   overlay.classList.add('hidden');
+  pausePanel.classList.remove('show');
   loadLevel();
   state = 'play';
   hud();
@@ -584,6 +654,8 @@ function startFromOverlay() {
 function showEntry() {
   state = 'entry';
   progEl.classList.remove('show');
+  comboBar.classList.remove('show');
+  pausePanel.classList.remove('show');
   overlay.classList.remove('hidden');
   overlay.innerHTML = `
     <div class="logo">SUPER<br>SOLARIO</div>
@@ -632,13 +704,15 @@ function bindShare(btnId, rank) {
 function gameOver() {
   state = 'over';
   progEl.classList.remove('show');
+  comboBar.classList.remove('show');
+  pausePanel.classList.remove('show');
   const res = submitToBoard(true);
   const rank = res && res.rank ? res.rank : (window.SolarioLB ? SolarioLB.getRank(username) : 0);
   overlay.classList.remove('hidden');
   overlay.innerHTML = `
     <div class="logo" style="font-size:clamp(16px,4vw,28px)">REKT</div>
     <div class="sub">PAPER HANDS DETECTED</div>
-    <div class="blurb"><b>${username}</b> scored <b>${score.toLocaleString()}</b><br>${coins} coins · Lv ${level}${rank ? ` · Rank #${rank}` : ''}${beatBest ? '<br><span style="color:var(--mint)">NEW PERSONAL BEST</span>' : ''}</div>
+    <div class="blurb"><b>${username}</b> scored <b>${score.toLocaleString()}</b><br>${coins} coins · Lv ${level} · ${formatTime(runFrames)}${rank ? ` · Rank #${rank}` : ''}${beatBest ? '<br><span style="color:var(--mint)">NEW PERSONAL BEST</span>' : ''}</div>
     <div class="row">
       <button class="btn" id="btnRetry">RETRY</button>
       <button class="btn ghost" id="btnShare">SHARE</button>
@@ -662,6 +736,8 @@ function gameOver() {
 
 function levelClearUI() {
   state = 'clear';
+  comboBar.classList.remove('show');
+  pausePanel.classList.remove('show');
   const res = submitToBoard(true);
   submitted = false; // allow later death submit / higher score
   const rank = res && res.rank ? res.rank : (window.SolarioLB ? SolarioLB.getRank(username) : 0);
@@ -670,7 +746,7 @@ function levelClearUI() {
   overlay.innerHTML = `
     <div class="logo" style="font-size:clamp(16px,4vw,28px)">LEVEL ${level}<br>CLEARED</div>
     <div class="sub">+${(1200 * level).toLocaleString()} $SOLARIO</div>
-    <div class="blurb">Total <b>${score.toLocaleString()}</b> · Next: ${nextTheme.name}${rank ? ` · Rank #${rank}` : ''}</div>
+    <div class="blurb">Total <b>${score.toLocaleString()}</b> · Time ${formatTime(runFrames)} · Next: ${nextTheme.name}${rank ? ` · Rank #${rank}` : ''}</div>
     <div class="row">
       <button class="btn" id="btnNext">NEXT LEVEL</button>
       <button class="btn ghost" id="btnShare">SHARE</button>
@@ -692,15 +768,19 @@ function nextLevel() {
 function togglePause() {
   if (state === 'play') {
     state = 'pause';
+    pausePanel.classList.add('show');
+    needsPaint = true;
   } else if (state === 'pause') {
     state = 'play';
+    pausePanel.classList.remove('show');
     last = performance.now();
+    needsPaint = true;
   }
 }
 
 function hurt(fell = false) {
   if (player.inv > 0) return;
-  combo = 0; comboT = 0;
+  combo = 0; comboT = 0; coinStreak = 0; hurtVignette = 24;
   if (player.power > 0 && !fell) {
     player.power = Math.max(0, player.power - 1);
     player.inv = 100;
@@ -747,6 +827,9 @@ function update(dt) {
 
   if (state !== 'play') return;
   frame++;
+  runFrames++;
+  if (runFrames % 30 === 0) hud();
+  if (coinStreakT > 0) { coinStreakT--; if (coinStreakT <= 0) coinStreak = 0; }
 
   const spd = player.power === 2 ? 6.3 : 4.9;
   const want = left() ? -spd : right() ? spd : 0;
@@ -789,6 +872,21 @@ function update(dt) {
   if (player.on && !wasOn) {
     player.land = 6;
     burst(player.x + 11, player.y + player.h, '#a78bfa', 6, 0.5);
+    if (!reduceMotion) sfx.land();
+  }
+  if (player.power === 2 && !reduceMotion) {
+    trailT += dt;
+    if (trailT > 1.4) {
+      trailT = 0;
+      particles.push({
+        x: player.x + 11, y: player.y + player.h * 0.5,
+        vx: -player.face * 0.3, vy: -0.2, life: 0.7, fade: 0.04, color: '#fbbf24', r: 2.5
+      });
+      if (particles.length > PARTICLE_CAP) {
+        const old = particles.shift();
+        if (old && particlePool.length < 120) particlePool.push(old);
+      }
+    }
   }
   if (player.land > 0) player.land--;
   if (player.inv > 0) player.inv--;
@@ -806,7 +904,14 @@ function update(dt) {
   }
   if (Math.abs(player.vx) > 0.5 && player.on) player.walk += Math.abs(player.vx) * 0.2 * dt;
 
-  if (comboT > 0) { comboT--; if (comboT <= 0) combo = 0; }
+  if (comboT > 0) {
+    comboT--;
+    if (comboT <= 0) combo = 0;
+    if (combo > 1) {
+      comboBar.classList.add('show');
+      comboFill.style.width = ((comboT / COMBO_MAX_T) * 100).toFixed(1) + '%';
+    } else comboBar.classList.remove('show');
+  } else comboBar.classList.remove('show');
 
   for (const c of world.checkpoints) {
     if (!c.got && player.x + player.w > c.x) {
@@ -834,7 +939,9 @@ function update(dt) {
     c.a += 0.07 * dt;
     if (aabb(player.x, player.y, player.w, player.h, c.x - c.r, c.y - c.r, c.r * 2, c.r * 2)) {
       c.taken = true; coins++;
-      addScore(10, c.x, c.y - 10, '+10');
+      coinStreak++; coinStreakT = 45;
+      const bonus = coinStreak >= 5 ? 5 : 0;
+      addScore(10 + bonus, c.x, c.y - 10, bonus ? `+${10 + bonus}` : '+10');
       burst(c.x, c.y, '#ffd700', 8);
       sfx.coin();
       if (coins % 100 === 0) { lives++; toast('EXTRA LIFE'); hud(); }
@@ -870,12 +977,12 @@ function update(dt) {
     resolveEnemy(e, dt);
     if (player.inv === 0 && aabb(player.x, player.y, player.w, player.h, e.x, e.y, e.w, e.h)) {
       if (player.power === 2) {
-        e.alive = false; combo++; comboT = 50;
+        e.alive = false; combo++; comboT = COMBO_MAX_T;
         const pts = 500 * Math.min(combo, 5);
         addScore(pts, e.x + 14, e.y, combo > 1 ? `x${combo} +${pts}` : '+500');
         sfx.stomp(combo); burst(e.x + 14, e.y + 14, '#ff8a00', 12);
       } else if (player.vy > 0.8 && player.y + player.h < e.y + e.h * 0.62) {
-        e.hp--; player.vy = -9.2; combo++; comboT = 50; sfx.stomp(combo);
+        e.hp--; player.vy = -9.2; combo++; comboT = COMBO_MAX_T; sfx.stomp(combo);
         if (e.hp <= 0) {
           e.alive = false; e.sq = 24;
           const pts = 200 * Math.min(combo, 5);
@@ -918,6 +1025,7 @@ function tickFx(dt) {
     hudFlashT--;
     if (hudFlashT <= 0) document.getElementById('hud').classList.remove('flash');
   }
+  if (hurtVignette > 0) hurtVignette--;
   if (player && world && (state === 'play' || state === 'pole')) {
     const pct = Math.max(0, Math.min(1, player.x / Math.max(1, world.flagX)));
     progFill.style.width = (pct * 100).toFixed(1) + '%';
@@ -1181,15 +1289,18 @@ function render() {
 
   if (combo > 1 && state === 'play') {
     ctx.fillStyle = '#ffd700'; ctx.font = "10px 'Press Start 2P'"; ctx.textAlign = 'center';
-    ctx.fillText('COMBO x' + combo, W() / 2, 34); ctx.textAlign = 'left';
+    ctx.fillText('COMBO x' + combo, W() / 2, 28); ctx.textAlign = 'left';
   }
-  if (state === 'pause') {
-    ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, W(), H());
-    ctx.fillStyle = '#f0b429'; ctx.font = "16px 'Press Start 2P'"; ctx.textAlign = 'center';
-    ctx.fillText('PAUSED', W() / 2, H() / 2 - 8);
-    ctx.font = "7px 'Press Start 2P'"; ctx.fillStyle = '#aaa';
-    ctx.fillText('P / ESC TO RESUME · M MUTE', W() / 2, H() / 2 + 18);
-    ctx.textAlign = 'left';
+  if (hurtVignette > 0) {
+    ctx.fillStyle = `rgba(255,40,70,${0.18 * (hurtVignette / 24)})`;
+    ctx.fillRect(0, 0, W(), H());
+  }
+  if (player && player.power === 2 && state === 'play') {
+    ctx.strokeStyle = 'rgba(251,191,36,.25)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(player.x + player.w / 2 - camX, player.y + player.h / 2 - camY, 22 + Math.sin(frame * 0.2) * 2, 0, Math.PI * 2);
+    ctx.stroke();
   }
   if (frame < 120 && state === 'play') {
     ctx.globalAlpha = Math.max(0, 1 - frame / 100) * 0.7;
@@ -1218,7 +1329,7 @@ function loop(t) {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && state === 'play') { state = 'pause'; needsPaint = true; }
+  if (document.hidden && state === 'play') togglePause();
 });
 
 // boot
@@ -1238,6 +1349,7 @@ window.__SOLARIO_GAME__ = {
   get username() { return username; },
   get muted() { return muted; },
   get personalBest() { return personalBest; },
+  get runFrames() { return runFrames; },
   get playerX() { return player ? player.x : 0; },
   get playerY() { return player ? player.y : 0; },
   startFromOverlay,

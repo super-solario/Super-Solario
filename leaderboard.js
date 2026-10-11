@@ -12,6 +12,7 @@
   const MAX = 25;
   const MAX_RECENT = 12;
   const MAX_SCORE = 9999999;
+  const SEASON = 'SEASON 1 · LOCAL';
   const MAX_COINS = 99999;
   const MAX_LEVEL = 99;
 
@@ -277,7 +278,7 @@
   }
 
   global.SolarioLB = {
-    KEY, RECENT_KEY, MAX, MAX_RECENT, MAX_SCORE,
+    KEY, RECENT_KEY, MAX, MAX_RECENT, MAX_SCORE, SEASON,
     getScores, getRecent, getRank, getEntry, getTop, getPersonalBest,
     submitScore, getUsername, setUsername, normalizeName, sanitizeEntry,
     onUpdate, formatScore, timeAgo, shareText, shareScore, escapeHtml

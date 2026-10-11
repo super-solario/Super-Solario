@@ -138,6 +138,39 @@ section{padding:90px 20px}
 }
 .desc{color:var(--muted);font-size:15px;line-height:1.8;max-width:560px}
 
+/* HOW TO PLAY */
+#howto{background:var(--ink);border-block:1px solid var(--line)}
+.how-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:36px;
+}
+.how-item{padding:8px 4px}
+.how-item kbd{
+  display:inline-block;min-width:36px;padding:8px 10px;margin:0 3px 10px;
+  border:1px solid var(--line);background:#0c0c18;color:var(--gold);
+  font-family:var(--font-pixel);font-size:8px;text-align:center;
+}
+.how-item h3{font-family:var(--font-pixel);font-size:8px;color:#fff;margin-bottom:8px}
+.how-item p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* CONTRACT SLOT */
+#contract{background:linear-gradient(180deg,#080814,var(--panel))}
+.ca-box{
+  margin-top:28px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  padding:16px 18px;border:1px dashed rgba(240,180,41,.35);background:rgba(240,180,41,.04);
+}
+.ca-box code{
+  font-family:var(--font-pixel);font-size:8px;color:var(--mint);letter-spacing:1px;
+  word-break:break-all;flex:1;min-width:200px;
+}
+.ca-box button{
+  font-family:var(--font-pixel);font-size:7px;padding:12px 16px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--amber));color:#111;
+}
+.ca-box button.ghost-ca{
+  background:transparent;color:var(--gold);border:2px solid var(--gold);
+}
+.ca-note{margin-top:12px;font-size:12px;color:#555;line-height:1.6}
+
 /* PLAY + LEADERBOARD */
 #play{background:linear-gradient(180deg,var(--ink),#080814 40%,var(--panel))}
 .play-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:24px;margin-top:40px;align-items:start}
@@ -260,12 +293,12 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 @media(max-width:900px){
-  .play-grid,.phases,.stats{grid-template-columns:1fr 1fr}
+  .play-grid,.phases,.stats,.how-grid{grid-template-columns:1fr 1fr}
   .play-grid{grid-template-columns:1fr}
 }
 @media(max-width:720px){
   .nav-links,.nav-cta{display:none}#burger{display:flex}
-  .phases,.stats{grid-template-columns:1fr}
+  .phases,.stats,.how-grid{grid-template-columns:1fr}
   .hero-actions{flex-direction:column;align-items:center}
   nav{padding-top:max(14px,env(safe-area-inset-top))}
 }
@@ -280,16 +313,17 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   <div class="nav-logo">🌙 $SOLARIO</div>
   <ul class="nav-links">
     <li><a href="#play">Play</a></li>
+    <li><a href="#howto">Controls</a></li>
     <li><a href="#leaderboard">Board</a></li>
+    <li><a href="#contract">CA</a></li>
     <li><a href="#tokenomics">Token</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#faq">FAQ</a></li>
   </ul>
   <a class="nav-cta" href="#play">PLAY NOW</a>
   <div id="burger" onclick="document.getElementById('mnav').classList.toggle('open')"><span></span><span></span><span></span></div>
 </nav>
 <div id="mnav" onclick="this.classList.remove('open')">
-  <a href="#play">Play</a><a href="#leaderboard">Board</a><a href="#tokenomics">Token</a><a href="#roadmap">Roadmap</a><a href="#faq">FAQ</a>
+  <a href="#play">Play</a><a href="#howto">Controls</a><a href="#leaderboard">Board</a><a href="#contract">CA</a><a href="#tokenomics">Token</a><a href="#faq">FAQ</a>
 </div>
 
 <section id="hero">
@@ -329,6 +363,36 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   </div>
 </div>
 
+<section id="howto">
+  <div class="wrap">
+    <span class="tag">// HOW TO PLAY</span>
+    <h2 class="htag">CONTROLS</h2>
+    <p class="desc">Four themed levels. Stomp bears, smash $ blocks, grab power-ups, reach the flag. Best score on this device climbs the board.</p>
+    <div class="how-grid">
+      <div class="how-item">
+        <kbd>←</kbd><kbd>→</kbd>
+        <h3>MOVE</h3>
+        <p>Run the moon district. A / D also work.</p>
+      </div>
+      <div class="how-item">
+        <kbd>SPACE</kbd>
+        <h3>JUMP</h3>
+        <p>Coyote time + buffer. Tap short, hold tall.</p>
+      </div>
+      <div class="how-item">
+        <kbd>P</kbd>
+        <h3>PAUSE</h3>
+        <p>Freeze mid-run. Resume from the panel.</p>
+      </div>
+      <div class="how-item">
+        <kbd>M</kbd>
+        <h3>MUTE</h3>
+        <p>SFX on/off — preference is saved.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="play">
   <div class="wrap">
     <span class="tag">// PLAYABLE UTILITY</span>
@@ -336,7 +400,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     <p class="desc">Enter a username in-game, clear levels, and your best run syncs to the local board on this page (this browser / device).</p>
     <div class="play-grid">
       <div class="game-shell">
-        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2.2</span></div>
+        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2.3</span></div>
         <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario Bros" allow="autoplay; clipboard-write" loading="lazy"></iframe>
         <div class="game-note">
           Or <a href="super-solario-game.html" target="_blank" rel="noopener">open full screen</a>
@@ -346,7 +410,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <aside class="lb-panel" id="leaderboard">
         <div class="lb-head">
           <h3>DIAMOND HANDS BOARD</h3>
-          <div class="lb-live"><i></i> LOCAL</div>
+          <div class="lb-live"><i></i> <span id="lbSeason">LOCAL</span></div>
         </div>
         <ol class="lb-list" id="lbList"></ol>
         <div class="lb-youbar" id="lbYou"></div>
@@ -357,6 +421,20 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
         <p class="lb-foot">Best score per username on <b>this device</b>. Stored in your browser (localStorage) — not on-chain, not a global competitive board. Demo rows are labeled DEMO.</p>
       </aside>
     </div>
+  </div>
+</section>
+
+<section id="contract">
+  <div class="wrap">
+    <span class="tag">// CONTRACT</span>
+    <h2 class="htag">CONTRACT ADDRESS</h2>
+    <p class="desc">Paste your minted Solana mint address here when ready. Until then this slot stays TBA — never trust a CA from a random chat screenshot.</p>
+    <div class="ca-box">
+      <code id="caText">TBA — UPDATE AFTER MINT</code>
+      <button type="button" id="caCopy">COPY</button>
+      <button type="button" id="shareSite" class="ghost-ca">SHARE SITE</button>
+    </div>
+    <p class="ca-note">Verify any address on a trusted explorer before buying. This site does not execute trades.</p>
   </div>
 </section>
 
@@ -463,6 +541,51 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   let firstPaint = true;
   let knownTs = new Set();
   const esc = (s) => SolarioLB.escapeHtml(s);
+
+  const seasonEl = document.getElementById('lbSeason');
+  if (seasonEl && SolarioLB.SEASON) seasonEl.textContent = SolarioLB.SEASON;
+
+  // Contract / share helpers — set window.__SOLARIO_CA__ after mint to enable copy
+  const caText = document.getElementById('caText');
+  const caCopy = document.getElementById('caCopy');
+  const shareSite = document.getElementById('shareSite');
+  if (typeof window.__SOLARIO_CA__ === 'string' && window.__SOLARIO_CA__.trim()) {
+    caText.textContent = window.__SOLARIO_CA__.trim();
+  }
+  caCopy.addEventListener('click', async () => {
+    const v = (caText.textContent || '').trim();
+    if (!v || v.startsWith('TBA')) {
+      caCopy.textContent = 'NO CA YET';
+      setTimeout(() => { caCopy.textContent = 'COPY'; }, 1200);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(v);
+      caCopy.textContent = 'COPIED';
+    } catch (e) {
+      caCopy.textContent = 'FAILED';
+    }
+    setTimeout(() => { caCopy.textContent = 'COPY'; }, 1200);
+  });
+  shareSite.addEventListener('click', async () => {
+    const url = location.href.split('#')[0];
+    const text = '$SOLARIO — play Super Solario Bros. ' + url;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: '$SOLARIO', text, url });
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      shareSite.textContent = 'COPIED';
+    } catch (e) {
+      shareSite.textContent = 'FAILED';
+    }
+    setTimeout(() => { shareSite.textContent = 'SHARE SITE'; }, 1200);
+  });
 
   // FAQ accordion (buttons)
   document.querySelectorAll('#faq .fq').forEach((btn) => {
