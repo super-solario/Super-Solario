@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#05050c">
 <meta name="robots" content="index,follow">
 <meta property="og:title" content="$SOLARIO — Play. Stack. Moon.">
-<meta property="og:description" content="Play Super Solario Bros. Stack coins, stomp bears. Browser scoreboard on this device.">
+<meta property="og:description" content="Play Super Solario — Mario-bright Solana platformer. Stack SOL coins, stomp ruglets. Local board on this device.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="$SOLARIO — Play. Stack. Moon.">
@@ -175,16 +175,17 @@ section{padding:90px 20px}
 #play{background:linear-gradient(180deg,var(--ink),#080814 40%,var(--panel))}
 .play-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:24px;margin-top:40px;align-items:start}
 .game-shell{
-  border:2px solid var(--gold);background:#05050c;
-  box-shadow:0 0 60px rgba(240,180,41,.12);
-  overflow:hidden;
+  border:3px solid #fbbf24;background:#0b1220;
+  box-shadow:0 0 60px rgba(94,200,255,.18),0 8px 0 #78350f;
+  overflow:hidden;border-radius:12px;
 }
 .game-bar{
   display:flex;justify-content:space-between;align-items:center;
-  padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.45);
-  font-family:var(--font-pixel);font-size:8px;color:var(--gold);
+  padding:12px 16px;border-bottom:3px solid #fbbf24;
+  background:linear-gradient(180deg,#1e293b,#0f172a);
+  font-family:var(--font-pixel);font-size:8px;color:#fbbf24;
 }
-.game-shell iframe{display:block;width:100%;height:min(68vh,580px);border:0;background:#000}
+.game-shell iframe{display:block;width:100%;height:min(68vh,580px);border:0;background:#5ec8ff}
 .game-note{
   padding:14px 16px;font-family:var(--font-pixel);font-size:6px;color:#666;line-height:2;
   border-top:1px solid var(--line);text-align:center;
@@ -367,7 +368,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   <div class="wrap">
     <span class="tag">// HOW TO PLAY</span>
     <h2 class="htag">CONTROLS</h2>
-    <p class="desc">Four themed levels. Stomp bears, smash $ blocks, grab power-ups, reach the flag. Best score on this device climbs the board.</p>
+    <p class="desc">Four bright worlds. Stomp ruglets, smash ? blocks, stack SOL coins, grab mushrooms &amp; stars, race the flag. Best score on this device climbs the board.</p>
     <div class="how-grid">
       <div class="how-item">
         <kbd>←</kbd><kbd>→</kbd>
@@ -396,12 +397,12 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
 <section id="play">
   <div class="wrap">
     <span class="tag">// PLAYABLE UTILITY</span>
-    <h2 class="htag">SUPER SOLARIO BROS</h2>
-    <p class="desc">Enter a username in-game, clear levels, and your best run syncs to the local board on this page (this browser / device).</p>
+    <h2 class="htag">SUPER SOLARIO</h2>
+    <p class="desc">Grass Chain → Neon Reef → Lava Ledger → Moon Market. Enter a username, clear levels, and your best run syncs to the local board on this page.</p>
     <div class="play-grid">
       <div class="game-shell">
-        <div class="game-bar"><span>SUPER SOLARIO BROS</span><span style="color:#666">v2.4</span></div>
-        <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario Bros" allow="autoplay; clipboard-write" loading="lazy"></iframe>
+        <div class="game-bar"><span>SUPER SOLARIO</span><span style="color:#14F195">v3.0 · GRASS CHAIN</span></div>
+        <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario" allow="autoplay; clipboard-write" loading="lazy"></iframe>
         <div class="game-note">
           Or <a href="super-solario-game.html" target="_blank" rel="noopener">open full screen</a>
           · ← → move · space jump · P pause · M mute
