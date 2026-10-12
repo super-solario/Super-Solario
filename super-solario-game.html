@@ -1261,23 +1261,24 @@ function drawGroundStrip(sx, sy, w, h) {
   dirt.addColorStop(1, '#451a03');
   ctx.fillStyle = dirt;
   ctx.fillRect(sx, sy + 14, w, h);
-  // strata lines
-  ctx.strokeStyle = 'rgba(69,26,3,.25)';
-  ctx.lineWidth = 1;
-  for (let y = sy + 28; y < sy + 90; y += 10) {
+  // soft dirt strata (no harsh grid)
+  ctx.strokeStyle = 'rgba(69,26,3,.14)';
+  ctx.lineWidth = 1.5;
+  for (let y = sy + 32; y < sy + 100; y += 14) {
     ctx.beginPath();
     ctx.moveTo(sx, y);
-    for (let x = sx; x < sx + w; x += 8) ctx.lineTo(x + 4, y + ((x >> 2) % 3) - 1);
+    for (let x = sx; x < sx + w; x += 16) {
+      ctx.quadraticCurveTo(x + 8, y + ((Math.floor(x) % 5) - 2), x + 16, y);
+    }
     ctx.stroke();
   }
-  // pebbles
-  ctx.fillStyle = 'rgba(0,0,0,.16)';
-  for (let i = 0; i < w; i += 6) {
-    const ox = ((Math.floor(sx + i) * 17) % 5);
-    ctx.beginPath(); ctx.ellipse(sx + i + ox, sy + 24 + ((i * 3) % 14), 1.6, 1.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(253,230,138,.2)';
-    ctx.fillRect(sx + i + 2, sy + 48 + ((i * 5) % 20), 2, 2);
-    ctx.fillStyle = 'rgba(0,0,0,.16)';
+  // sparse pebbles
+  for (let i = 0; i < w; i += 18) {
+    const ox = ((Math.floor(sx + i) * 17) % 7);
+    ctx.fillStyle = 'rgba(0,0,0,.12)';
+    ctx.beginPath(); ctx.ellipse(sx + i + ox, sy + 26 + ((i * 3) % 16), 2, 1.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(180,83,9,.35)';
+    ctx.beginPath(); ctx.ellipse(sx + i + ox + 6, sy + 52 + ((i * 5) % 18), 1.5, 1, 0, 0, Math.PI * 2); ctx.fill();
   }
   // grass cap with soft bevel
   const grass = ctx.createLinearGradient(0, sy - 2, 0, sy + 18);
@@ -1432,11 +1433,31 @@ function drawPitVoid() {
 
 function drawPlats() {
   drawPitVoid();
+  // Merge adjacent ground tiles so dirt doesn't show a 32px grid
+  const grounds = world.plats.filter(p => p.type === 'ground').slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  let run = null;
+  const flush = () => {
+    if (!run) return;
+    const sx = run.x - camX;
+    if (!(sx > W() + 60 || sx + run.w < -60)) drawGroundStrip(sx, run.y, run.w, run.h);
+    run = null;
+  };
+  for (const g of grounds) {
+    if (run && g.y === run.y && Math.abs(g.x - (run.x + run.w)) < 1) {
+      run.w += g.w;
+      run.h = Math.max(run.h, g.h);
+    } else {
+      flush();
+      run = { x: g.x, y: g.y, w: g.w, h: g.h };
+    }
+  }
+  flush();
+
   for (const p of world.plats) {
+    if (p.type === 'ground') continue;
     const sx = p.x - camX;
     if (sx > W() + 60 || sx + p.w < -60) continue;
-    if (p.type === 'ground') drawGroundStrip(sx, p.y, p.w, p.h);
-    else if (p.type === 'brick') drawBrickPlat(sx, p.y, p.w, p.h, p.mov);
+    if (p.type === 'brick') drawBrickPlat(sx, p.y, p.w, p.h, p.mov);
     else if (p.type === 'q') drawQBlock(sx, p.y, p.hit, p.bump);
     else if (p.type === 'pipe') drawPipe(sx, p.y, p.w, p.h);
   }
