@@ -141,11 +141,9 @@
   }
 
   function apiHeaders() {
-    return {
-      'Content-Type': 'application/json',
-      'Bypass-Tunnel-Reminder': '1',
-      'Accept': 'application/json'
-    };
+    // Keep headers CORS-simple (Content-Type only) so preflight succeeds
+    // on tunnels / workers. Avoid custom headers like Bypass-Tunnel-Reminder.
+    return { 'Content-Type': 'application/json' };
   }
 
   async function fetchRemoteBoard() {
