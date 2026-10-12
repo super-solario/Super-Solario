@@ -217,22 +217,27 @@ let username = (window.SolarioLB && SolarioLB.getUsername()) || '';
 unameIn.value = username;
 
 let resizeTimer = 0, lastH = 0, dpr = 1;
-function resize() {
+function resize(force) {
   const r = stage.getBoundingClientRect();
   const nh = Math.max(300, Math.round(900 * (r.height / Math.max(1, r.width))));
   dpr = Math.min(2, window.devicePixelRatio || 1);
-  if (Math.abs(nh - lastH) < 3 && canvas.width === Math.round(900 * dpr)) return;
+  const tw = Math.round(900 * dpr), th = Math.round(nh * dpr);
+  if (!force && Math.abs(nh - lastH) < 3 && canvas.width === tw && canvas.height === th) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return;
+  }
   lastH = nh;
-  canvas.width = Math.round(900 * dpr);
-  canvas.height = Math.round(nh * dpr);
+  canvas.width = tw;
+  canvas.height = th;
   canvas.style.width = '100%';
   canvas.style.height = '100%';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (typeof needsPaint !== 'undefined') needsPaint = true;
 }
-resize();
+resize(true);
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(resize, 120);
+  resizeTimer = setTimeout(() => resize(true), 120);
 });
 
 let AC = null, muted = false;
@@ -647,6 +652,7 @@ function clearJump() {
 }
 
 function loadLevel() {
+  resize(true);
   world = buildLevel(level);
   world.powerups = [];
   if (checkpoint.set && world.checkpoints) {
