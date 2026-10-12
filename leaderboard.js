@@ -1,20 +1,24 @@
 /**
- * Super Solario — Local Leaderboard (v2)
- * Best-per-user board + recent runs.
- * Syncs via localStorage + BroadcastChannel (site ↔ game iframe ↔ tabs).
- * Scores are browser-local only — not on-chain / not a global competitive board.
+ * Super Solario — Hybrid Leaderboard (local + remote backend)
+ * - Instant localStorage UX
+ * - Syncs with remote API when available
+ * - Mirrors durable board from data/leaderboard.json
  */
 (function (global) {
-  const KEY = 'solario_leaderboard_v2';
-  const RECENT_KEY = 'solario_recent_v1';
+  const KEY = 'solario_leaderboard_v3';
+  const RECENT_KEY = 'solario_recent_v3';
   const USER_KEY = 'solario_username';
   const CHANNEL = 'solario_lb';
   const MAX = 25;
   const MAX_RECENT = 12;
   const MAX_SCORE = 9999999;
-  const SEASON = 'SEASON 1 · LOCAL';
   const MAX_COINS = 99999;
   const MAX_LEVEL = 99;
+
+  const cfg = global.SOLARIO_LB_REMOTE || {};
+  let SEASON = cfg.season || 'SEASON 1 · GLOBAL';
+  let remoteOnline = false;
+  let lastRemoteFetch = 0;
 
   const bus = ('BroadcastChannel' in global) ? new BroadcastChannel(CHANNEL) : null;
 
@@ -84,15 +88,10 @@
   }
 
   function safeSet(key, value) {
-    try {
-      localStorage.setItem(key, value);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
   }
 
-  function read() {
+  function readLocal() {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) {
@@ -100,41 +99,99 @@
         safeSet(KEY, JSON.stringify(s));
         return s.slice();
       }
-      const parsed = JSON.parse(raw);
-      const clean = sanitizeList(parsed);
+      const clean = sanitizeList(JSON.parse(raw));
       return clean.length ? clean : seed();
-    } catch (e) {
-      return seed();
-    }
+    } catch (e) { return seed(); }
   }
 
-  function readRecent() {
+  function readRecentLocal() {
     try {
       const raw = localStorage.getItem(RECENT_KEY);
       if (!raw) return [];
       return sanitizeRecent(JSON.parse(raw));
-    } catch (e) {
-      return [];
-    }
+    } catch (e) { return []; }
   }
 
   function emit(scores, recent) {
     if (bus) {
-      try { bus.postMessage({ type: 'update', scores, recent }); } catch (e) {}
+      try { bus.postMessage({ type: 'update', scores, recent, remote: remoteOnline }); } catch (e) {}
     }
     try {
-      global.dispatchEvent(new CustomEvent('solario-lb', { detail: { scores, recent } }));
+      global.dispatchEvent(new CustomEvent('solario-lb', { detail: { scores, recent, remote: remoteOnline } }));
     } catch (e) {}
   }
 
-  function write(list) {
+  function writeLocal(list) {
     const sliced = sanitizeList(list).slice(0, MAX);
     safeSet(KEY, JSON.stringify(sliced));
-    emit(sliced, readRecent());
+    emit(sliced, readRecentLocal());
   }
 
-  function writeRecent(list) {
+  function writeRecentLocal(list) {
     safeSet(RECENT_KEY, JSON.stringify(sanitizeRecent(list).slice(0, MAX_RECENT)));
+  }
+
+  function mergeBoards(a, b) {
+    const map = Object.create(null);
+    sanitizeList(a).concat(sanitizeList(b)).forEach((e) => {
+      const prev = map[e.name];
+      if (!prev || e.score > prev.score || (e.score === prev.score && e.ts > prev.ts)) map[e.name] = e;
+    });
+    return Object.keys(map).map((k) => map[k]).sort((x, y) => y.score - x.score || y.ts - x.ts).slice(0, MAX);
+  }
+
+  function apiHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Bypass-Tunnel-Reminder': '1',
+      'Accept': 'application/json'
+    };
+  }
+
+  async function fetchRemoteBoard() {
+    const urls = [];
+    if (cfg.apiUrl) urls.push(String(cfg.apiUrl).replace(/\/$/, '') + '/board');
+    if (cfg.boardUrl) urls.push(cfg.boardUrl);
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const r = await fetch(urls[i], { headers: apiHeaders(), cache: 'no-store' });
+        if (!r.ok) continue;
+        const data = await r.json();
+        const entries = sanitizeList(data.entries || data);
+        if (!entries.length) continue;
+        remoteOnline = /\/board$/.test(urls[i]) || !!cfg.apiUrl;
+        lastRemoteFetch = Date.now();
+        if (data.season) SEASON = data.season;
+        const merged = mergeBoards(entries, readLocal());
+        writeLocal(merged);
+        if (Array.isArray(data.recent)) writeRecentLocal(sanitizeRecent(data.recent));
+        emit(merged, readRecentLocal());
+        return { ok: true, entries: merged, remote: remoteOnline };
+      } catch (e) {}
+    }
+    remoteOnline = false;
+    return { ok: false, entries: getScores(), remote: false };
+  }
+
+  async function submitRemote(entry) {
+    if (!cfg.apiUrl) return null;
+    try {
+      const r = await fetch(String(cfg.apiUrl).replace(/\/$/, '') + '/submit', {
+        method: 'POST',
+        headers: apiHeaders(),
+        body: JSON.stringify(entry)
+      });
+      if (!r.ok) return null;
+      const data = await r.json();
+      if (!data || !data.ok) return null;
+      remoteOnline = true;
+      if (Array.isArray(data.scores)) writeLocal(sanitizeList(data.scores));
+      if (Array.isArray(data.recent)) writeRecentLocal(sanitizeRecent(data.recent));
+      return data;
+    } catch (e) {
+      remoteOnline = false;
+      return null;
+    }
   }
 
   function getUsername() {
@@ -148,18 +205,17 @@
   }
 
   function getScores() {
-    return read().slice().sort((a, b) => b.score - a.score || b.ts - a.ts);
+    return readLocal().slice().sort((a, b) => b.score - a.score || b.ts - a.ts);
   }
 
   function getRecent(limit) {
-    return readRecent().slice(0, limit == null ? MAX_RECENT : limit);
+    return readRecentLocal().slice(0, limit == null ? MAX_RECENT : limit);
   }
 
   function getRank(name) {
     const n = normalizeName(name || getUsername());
     if (!n) return 0;
-    const scores = getScores();
-    const i = scores.findIndex((r) => r.name === n);
+    const i = getScores().findIndex((r) => r.name === n);
     return i < 0 ? 0 : i + 1;
   }
 
@@ -177,7 +233,7 @@
     return e ? e.score : 0;
   }
 
-  function submitScore({ name, score, coins, level }) {
+  function submitScoreLocal({ name, score, coins, level }) {
     const entry = sanitizeEntry({
       name: name || getUsername(),
       score,
@@ -189,11 +245,11 @@
     if (!entry) return { ok: false, reason: 'name', entry: null };
     if (entry.score <= 0) return { ok: false, reason: 'zero', entry };
 
-    const recent = readRecent();
+    const recent = readRecentLocal();
     recent.unshift(entry);
-    writeRecent(recent);
+    writeRecentLocal(recent);
 
-    const list = read();
+    const list = readLocal();
     const idx = list.findIndex((r) => r.name === entry.name);
     let improved = true;
     if (idx >= 0) {
@@ -203,23 +259,39 @@
         const scores = getScores();
         const rank = scores.findIndex((r) => r.name === entry.name) + 1;
         emit(scores, recent.slice(0, MAX_RECENT));
-        return { ok: true, improved: false, entry: list[idx], scores, recent: recent.slice(0, MAX_RECENT), rank };
+        return { ok: true, improved: false, entry: list[idx], scores, recent: recent.slice(0, MAX_RECENT), rank, remote: false };
       }
-    } else {
-      list.push(entry);
-    }
+    } else list.push(entry);
     list.sort((a, b) => b.score - a.score || b.ts - a.ts);
-    write(list);
+    writeLocal(list);
     const scores = getScores();
     const rank = scores.findIndex((r) => r.name === entry.name) + 1;
-    return { ok: true, improved, entry, scores, recent: recent.slice(0, MAX_RECENT), rank };
+    return { ok: true, improved, entry, scores, recent: recent.slice(0, MAX_RECENT), rank, remote: false };
+  }
+
+  async function submitScore(opts) {
+    const local = submitScoreLocal(opts);
+    if (!local.ok) return local;
+    const remote = await submitRemote(local.entry);
+    if (remote && remote.ok) {
+      return {
+        ok: true,
+        improved: !!remote.improved,
+        entry: remote.entry || local.entry,
+        scores: remote.scores ? sanitizeList(remote.scores) : getScores(),
+        recent: remote.recent ? sanitizeRecent(remote.recent) : getRecent(),
+        rank: remote.rank || getRank(local.entry.name),
+        remote: true
+      };
+    }
+    return local;
   }
 
   function shareText({ name, score, coins, level, rank }) {
     const n = normalizeName(name || getUsername()) || 'ANON';
     const r = rank || getRank(n);
     const rankBit = r ? ` · Rank #${r}` : '';
-    return `$SOLARIO — ${n} scored ${formatScore(score)} (Lv ${level || 1}, ${coins || 0} coins)${rankBit}. Play Super Solario Bros!`;
+    return `$SOLARIO — ${n} scored ${formatScore(score)} (Lv ${level || 1}, ${coins || 0} coins)${rankBit}. Play Super Solario!`;
   }
 
   async function shareScore(opts) {
@@ -267,7 +339,6 @@
     return Math.floor(s / 86400) + 'd ago';
   }
 
-  /** Escape for safe HTML interpolation (names are already A-Z0-9_ but belt+suspenders). */
   function escapeHtml(str) {
     return String(str == null ? '' : str)
       .replace(/&/g, '&amp;')
@@ -277,10 +348,20 @@
       .replace(/'/g, '&#39;');
   }
 
+  function isRemoteOnline() { return remoteOnline; }
+  function getSeason() { return SEASON; }
+
+  // Kick off remote sync
+  fetchRemoteBoard().catch(() => {});
+  setInterval(() => { fetchRemoteBoard().catch(() => {}); }, 45000);
+
   global.SolarioLB = {
-    KEY, RECENT_KEY, MAX, MAX_RECENT, MAX_SCORE, SEASON,
+    KEY, RECENT_KEY, MAX, MAX_RECENT, MAX_SCORE,
+    get SEASON() { return SEASON; },
     getScores, getRecent, getRank, getEntry, getTop, getPersonalBest,
-    submitScore, getUsername, setUsername, normalizeName, sanitizeEntry,
-    onUpdate, formatScore, timeAgo, shareText, shareScore, escapeHtml
+    submitScore, submitScoreLocal, fetchRemoteBoard,
+    getUsername, setUsername, normalizeName, sanitizeEntry,
+    onUpdate, formatScore, timeAgo, shareText, shareScore, escapeHtml,
+    isRemoteOnline, getSeason
   };
 })(typeof window !== 'undefined' ? window : globalThis);

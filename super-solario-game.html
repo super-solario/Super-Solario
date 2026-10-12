@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<script src="lb-config.js"></script>
 <script src="leaderboard.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -50,7 +51,9 @@ canvas{display:block;width:100%;height:100%;image-rendering:auto}
   font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(26px,5.5vw,40px);
   color:#ef4444;-webkit-text-stroke:4px #fff;paint-order:stroke fill;
   letter-spacing:.5px;filter:drop-shadow(0 4px 0 #7f1d1d) drop-shadow(0 8px 12px rgba(0,0,0,.25));
+  transition:opacity .35s ease, transform .35s ease;
 }
+#logoMark.dim{opacity:0;transform:translateX(-50%) translateY(-8px);pointer-events:none}
 #progress{
   position:absolute;left:12px;right:12px;bottom:10px;height:6px;z-index:4;
   background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.35);border-radius:99px;
@@ -206,8 +209,17 @@ const pausePanel = document.getElementById('pausePanel');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const T = 32;
-const GRAV = 0.55;
-const MAX_FALL = 14;
+const GRAV = 0.72;
+const MAX_FALL = 15;
+const JUMP_V = -14.15;      // ~4.3 tiles peak with GRAV 0.72
+const JUMP_V_BIG = -14.85;
+const JUMP_V_STAR = -15.6;
+const MOVE_ACC = 0.9;
+const MOVE_AIR = 0.55;
+const FRICTION_G = 0.55;
+const FRICTION_A = 0.88;
+const COYOTE_MAX = 9;
+const JUMP_BUF_MAX = 8;
 const W = () => Math.round(canvas.width / (dpr || 1));
 const H = () => Math.round(canvas.height / (dpr || 1));
 const MUTE_KEY = 'solario_muted';
@@ -561,7 +573,8 @@ function makePlayer() {
   const y = checkpoint.set ? checkpoint.y : (pipe ? pipe.y - 36 : world.GY - 40);
   return {
     x, y, w: 24, h: 36, vx: 0, vy: 0, on: false, face: 1,
-    power: 0, powerT: 0, inv: 80, coy: 0, jbuf: 0, land: 0, walk: 0, dust: 0
+    power: 0, powerT: 0, inv: 80, coy: 0, jbuf: 0, land: 0, walk: 0, dust: 0,
+    jumpHeld: false
   };
 }
 
@@ -688,6 +701,8 @@ function startFromOverlay() {
   submitted = false;
   overlay.classList.add('hidden');
   pausePanel.classList.remove('show');
+  const logo = document.getElementById('logoMark');
+  if (logo) logo.classList.add('dim');
   loadLevel();
   state = 'play';
   hud();
@@ -699,11 +714,13 @@ function showEntry() {
   progEl.classList.remove('show');
   comboBar.classList.remove('show');
   pausePanel.classList.remove('show');
+  const logo = document.getElementById('logoMark');
+  if (logo) logo.classList.remove('dim');
   overlay.classList.remove('hidden');
   overlay.innerHTML = `
     <div class="logo">Super<br>Solario</div>
     <div class="sub">SOLANA PLATFORMER</div>
-    <div class="blurb">Pick a wallet alias. Stomp ruglets, stack <b>SOL coins</b>, smash ? blocks.<br>Best scores save to a <b>local</b> board on this device.</div>
+    <div class="blurb">Pick a wallet alias. Stomp ruglets, stack <b>SOL coins</b>, smash ? blocks.<br>Best scores sync to the <b>global</b> board when online.</div>
     <div class="best" id="bestLine"></div>
     <input id="uname" maxlength="12" placeholder="USERNAME" autocomplete="off" spellcheck="false" value="${(username || '').replace(/"/g, '')}">
     <div class="row"><button class="btn" id="btnStart">LAUNCH</button></div>
@@ -858,31 +875,42 @@ function update(dt) {
   if (runFrames % 30 === 0) hud();
   if (coinStreakT > 0) { coinStreakT--; if (coinStreakT <= 0) coinStreak = 0; }
 
-  const spd = player.power === 2 ? 6.3 : 4.9;
+  const spd = player.power === 2 ? 6.8 : player.power === 1 ? 5.8 : 5.35;
   const want = left() ? -spd : right() ? spd : 0;
   if (want !== 0) {
-    const a = player.on ? 0.55 : 0.28;
-    player.vx += Math.sign(want - player.vx) * Math.min(Math.abs(want - player.vx), a * dt * spd);
+    const a = (player.on ? MOVE_ACC : MOVE_AIR) * dt * spd;
+    player.vx += Math.sign(want - player.vx) * Math.min(Math.abs(want - player.vx), a);
     if ((want > 0 && player.vx > want) || (want < 0 && player.vx < want)) player.vx = want;
   } else {
-    player.vx *= Math.pow(player.on ? 0.78 : 0.92, dt);
-    if (Math.abs(player.vx) < 0.08) player.vx = 0;
+    // snappy stop on ground — Mario "lock"
+    if (player.on) {
+      player.vx *= Math.pow(FRICTION_G, dt);
+      if (Math.abs(player.vx) < 0.35) player.vx = 0;
+    } else {
+      player.vx *= Math.pow(FRICTION_A, dt);
+      if (Math.abs(player.vx) < 0.05) player.vx = 0;
+    }
   }
   if (left()) player.face = -1;
   if (right()) player.face = 1;
-  if (player.on && Math.abs(player.vx) > 0.4) player.walk = (player.walk + 0.18 * dt) % 2;
+  if (player.on && Math.abs(player.vx) > 0.4) player.walk = (player.walk + 0.22 * dt) % 2;
   else if (!player.on) player.walk = 0.5;
-  else player.walk *= 0.85;
+  else player.walk *= 0.8;
 
-  if (player.on) player.coy = 12; else if (player.coy > 0) player.coy--;
-  if (jump()) player.jbuf = 10; else if (player.jbuf > 0) player.jbuf--;
+  if (player.on) player.coy = COYOTE_MAX; else if (player.coy > 0) player.coy--;
+  if (jump()) player.jbuf = JUMP_BUF_MAX; else if (player.jbuf > 0) player.jbuf--;
   if (player.jbuf > 0 && player.coy > 0) {
-    player.vy = player.power === 2 ? -14.4 : player.power === 1 ? -13.0 : -12.25;
+    player.vy = player.power === 2 ? JUMP_V_STAR : player.power === 1 ? JUMP_V_BIG : JUMP_V;
     player.on = false; player.jbuf = 0; player.coy = 0;
+    player.jumpHeld = true;
     burst(player.x + 11, player.y + player.h, '#86efac', 6);
     sfx.jump();
   }
-  if (!jump() && player.vy < -3.5) player.vy *= Math.pow(0.55, dt * 0.35);
+  // Variable jump: release early => short hop (strong cut)
+  if (!jump()) {
+    player.jumpHeld = false;
+    if (player.vy < -2.2) player.vy *= Math.pow(0.42, dt);
+  }
 
   for (const p of world.plats) {
     if (p.mov) {
@@ -938,13 +966,15 @@ function update(dt) {
     }
   }
 
-  const tx = player.x - W() / 3 + player.vx * 10;
-  camX += (Math.max(0, Math.min(tx, world.WW * T - W())) - camX) * 0.22 * dt;
+  // camera look-ahead in move direction
+  const look = player.face * Math.min(90, 40 + Math.abs(player.vx) * 10);
+  const tx = player.x - W() / 2.6 + look + player.vx * 6;
+  camX += (Math.max(0, Math.min(tx, world.WW * T - W())) - camX) * 0.18 * dt;
   const sy = player.y - camY;
   let iy = camY;
-  if (sy < H() * 0.28) iy = player.y - H() * 0.28;
-  else if (sy > H() * 0.72) iy = Math.max(0, player.y - H() * 0.72);
-  camY += (Math.max(0, iy) - camY) * 0.14 * dt;
+  if (sy < H() * 0.32) iy = player.y - H() * 0.32;
+  else if (sy > H() * 0.62) iy = Math.max(0, player.y - H() * 0.62);
+  camY += (Math.max(0, iy) - camY) * 0.16 * dt;
   if (shakeT > 0 && !reduceMotion) { shakeT--; shakeX = (Math.random() - 0.5) * 5; shakeY = (Math.random() - 0.5) * 5; }
   else { shakeX = shakeY = 0; shakeT = 0; }
 
@@ -995,8 +1025,8 @@ function update(dt) {
         const pts = 500 * Math.min(combo, 5);
         addScore(pts, e.x + 14, e.y, combo > 1 ? `x${combo} +${pts}` : '+500');
         sfx.stomp(combo); burst(e.x + 14, e.y + 14, '#f97316', 12);
-      } else if (player.vy > 0.8 && player.y + player.h < e.y + e.h * 0.62) {
-        e.hp--; player.vy = -9.2; combo++; comboT = COMBO_MAX_T; sfx.stomp(combo);
+      } else if (player.vy > 0.5 && player.y + player.h - 8 < e.y + e.h * 0.55) {
+        e.hp--; player.vy = -10.2; combo++; comboT = COMBO_MAX_T; sfx.stomp(combo);
         if (e.hp <= 0) {
           e.alive = false; e.sq = 24;
           const pts = 200 * Math.min(combo, 5);
@@ -1909,12 +1939,12 @@ window.__SOLARIO_GAME__ = {
       hud();
     };
     window.__SOLARIO_GAME__.__debugJumpHeight = function () {
-      const v0 = -12.25, g = GRAV;
+      const v0 = JUMP_V, g = GRAV;
       return (v0 * v0) / (2 * g);
     };
     window.__SOLARIO_GAME__.__debugLevelReachable = function () {
       if (!world) return { ok: false };
-      const rise = (12.25 * 12.25) / (2 * GRAV);
+      const rise = (JUMP_V * JUMP_V) / (2 * GRAV);
       const bricks = world.plats.filter(p => p.type === 'brick' || p.type === 'q');
       const groundY = world.GY;
       const nodes = [{ x: 64, y: groundY, dy: 0 }];

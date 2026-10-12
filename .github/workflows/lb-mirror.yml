@@ -1,0 +1,13 @@
+name: Mirror leaderboard
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'data/leaderboard.json'
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate board JSON
+        run: node -e "const d=require('./data/leaderboard.json'); if(!Array.isArray(d.entries)) process.exit(1); console.log('entries', d.entries.length)"
