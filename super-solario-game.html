@@ -208,22 +208,26 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const T = 32;
 const GRAV = 0.55;
 const MAX_FALL = 14;
-const W = () => canvas.width;
-const H = () => canvas.height;
+const W = () => Math.round(canvas.width / (dpr || 1));
+const H = () => Math.round(canvas.height / (dpr || 1));
 const MUTE_KEY = 'solario_muted';
 const COMBO_MAX_T = 50;
 
 let username = (window.SolarioLB && SolarioLB.getUsername()) || '';
 unameIn.value = username;
 
-let resizeTimer = 0, lastH = 0;
+let resizeTimer = 0, lastH = 0, dpr = 1;
 function resize() {
   const r = stage.getBoundingClientRect();
   const nh = Math.max(300, Math.round(900 * (r.height / Math.max(1, r.width))));
-  if (Math.abs(nh - lastH) < 3 && canvas.width === 900) return;
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (Math.abs(nh - lastH) < 3 && canvas.width === Math.round(900 * dpr)) return;
   lastH = nh;
-  canvas.width = 900;
-  canvas.height = nh;
+  canvas.width = Math.round(900 * dpr);
+  canvas.height = Math.round(nh * dpr);
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resize();
 window.addEventListener('resize', () => {
@@ -1045,28 +1049,46 @@ function rr(x, y, w, h, r) {
 
 function drawMountain(x, baseY, w, h, far) {
   const th = world.theme;
-  const peakX = x + w * (0.42 + (Math.sin(x) * 0.08));
+  const p1 = x + w * 0.22;
+  const p2 = x + w * 0.48;
+  const p3 = x + w * 0.72;
   ctx.beginPath();
   ctx.moveTo(x, baseY);
-  ctx.lineTo(peakX, baseY - h);
+  ctx.lineTo(p1, baseY - h * 0.62);
+  ctx.lineTo(p1 + w * 0.08, baseY - h * 0.48);
+  ctx.lineTo(p2, baseY - h);
+  ctx.lineTo(p2 + w * 0.1, baseY - h * 0.55);
+  ctx.lineTo(p3, baseY - h * 0.78);
   ctx.lineTo(x + w, baseY);
   ctx.closePath();
-  const g = ctx.createLinearGradient(x, baseY - h, x + w * 0.2, baseY);
-  g.addColorStop(0, far ? th.mtFar : th.mtNear);
-  g.addColorStop(1, far ? th.mtNear : th.dirtDark);
+  const g = ctx.createLinearGradient(x, baseY - h, x + w * 0.3, baseY);
+  g.addColorStop(0, far ? th.mtFar : '#a8b2c0');
+  g.addColorStop(0.55, far ? th.mtNear : th.mtFar);
+  g.addColorStop(1, far ? '#64748b' : th.dirtDark);
   ctx.fillStyle = g;
   ctx.fill();
-  // snow cap
+  // ridge shade
+  ctx.fillStyle = 'rgba(15,23,42,.12)';
   ctx.beginPath();
-  ctx.moveTo(peakX - w * 0.12, baseY - h + h * 0.22);
-  ctx.lineTo(peakX, baseY - h);
-  ctx.lineTo(peakX + w * 0.14, baseY - h + h * 0.2);
-  ctx.lineTo(peakX + w * 0.04, baseY - h + h * 0.28);
-  ctx.lineTo(peakX - w * 0.02, baseY - h + h * 0.24);
+  ctx.moveTo(p2, baseY - h);
+  ctx.lineTo(p2 + w * 0.1, baseY - h * 0.55);
+  ctx.lineTo(x + w, baseY);
+  ctx.lineTo(p2, baseY);
   ctx.closePath();
-  ctx.fillStyle = th.snow;
-  ctx.globalAlpha = 0.92;
   ctx.fill();
+  // snow caps on main peaks
+  ctx.fillStyle = th.snow;
+  ctx.globalAlpha = 0.95;
+  [[p2, h, 0.14], [p3, h * 0.78, 0.1], [p1, h * 0.62, 0.09]].forEach(([px, ph, sw]) => {
+    ctx.beginPath();
+    ctx.moveTo(px - w * sw, baseY - ph + ph * 0.2);
+    ctx.lineTo(px, baseY - ph);
+    ctx.lineTo(px + w * sw * 1.1, baseY - ph + ph * 0.18);
+    ctx.lineTo(px + w * sw * 0.3, baseY - ph + ph * 0.28);
+    ctx.lineTo(px - w * sw * 0.2, baseY - ph + ph * 0.24);
+    ctx.closePath();
+    ctx.fill();
+  });
   ctx.globalAlpha = 1;
 }
 
@@ -1232,39 +1254,53 @@ function drawSolCoin(x, y, r, a) {
 
 function drawGroundStrip(sx, sy, w, h) {
   const th = world.theme;
-  const dirt = ctx.createLinearGradient(0, sy, 0, sy + 80);
-  dirt.addColorStop(0, th.dirt);
-  dirt.addColorStop(1, th.dirtDark);
+  const dirt = ctx.createLinearGradient(0, sy, 0, sy + 90);
+  dirt.addColorStop(0, '#d97706');
+  dirt.addColorStop(0.15, th.dirt);
+  dirt.addColorStop(0.55, th.dirtDark);
+  dirt.addColorStop(1, '#451a03');
   ctx.fillStyle = dirt;
   ctx.fillRect(sx, sy + 14, w, h);
-  // speckles
-  ctx.fillStyle = 'rgba(0,0,0,.12)';
-  for (let i = 0; i < w; i += 7) {
-    const ox = ((Math.floor(sx + i) * 13) % 5);
-    ctx.fillRect(sx + i + ox, sy + 22 + ((i * 3) % 11), 2, 2);
-    ctx.fillRect(sx + i + 3, sy + 40 + ((i * 5) % 17), 3, 2);
+  // strata lines
+  ctx.strokeStyle = 'rgba(69,26,3,.25)';
+  ctx.lineWidth = 1;
+  for (let y = sy + 28; y < sy + 90; y += 10) {
+    ctx.beginPath();
+    ctx.moveTo(sx, y);
+    for (let x = sx; x < sx + w; x += 8) ctx.lineTo(x + 4, y + ((x >> 2) % 3) - 1);
+    ctx.stroke();
   }
-  // grass cap
-  const grass = ctx.createLinearGradient(0, sy, 0, sy + 16);
-  grass.addColorStop(0, th.grassLite);
+  // pebbles
+  ctx.fillStyle = 'rgba(0,0,0,.16)';
+  for (let i = 0; i < w; i += 6) {
+    const ox = ((Math.floor(sx + i) * 17) % 5);
+    ctx.beginPath(); ctx.ellipse(sx + i + ox, sy + 24 + ((i * 3) % 14), 1.6, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(253,230,138,.2)';
+    ctx.fillRect(sx + i + 2, sy + 48 + ((i * 5) % 20), 2, 2);
+    ctx.fillStyle = 'rgba(0,0,0,.16)';
+  }
+  // grass cap with soft bevel
+  const grass = ctx.createLinearGradient(0, sy - 2, 0, sy + 18);
+  grass.addColorStop(0, '#86efac');
+  grass.addColorStop(0.35, th.grassLite);
   grass.addColorStop(1, th.grass);
   ctx.fillStyle = grass;
-  ctx.fillRect(sx, sy, w, 16);
-  ctx.fillStyle = 'rgba(255,255,255,.28)';
+  ctx.fillRect(sx, sy, w, 17);
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
   ctx.fillRect(sx, sy, w, 3);
-  // tufts
-  for (let i = 0; i < w; i += 6) {
-    const hgt = 3 + ((Math.floor(sx + i) + i) % 4);
-    ctx.fillStyle = th.grassLite;
+  // tufts / blades
+  for (let i = 0; i < w; i += 5) {
+    const sway = !reduceMotion ? Math.sin(frame * 0.08 + (sx + i) * 0.2) * 1.2 : 0;
+    const hgt = 4 + ((Math.floor(sx + i) + i) % 5);
+    ctx.fillStyle = (i % 10 < 5) ? '#bbf7d0' : th.grassLite;
     ctx.beginPath();
-    ctx.moveTo(sx + i, sy + 1);
-    ctx.lineTo(sx + i + 2, sy - hgt);
-    ctx.lineTo(sx + i + 4, sy + 1);
+    ctx.moveTo(sx + i, sy + 2);
+    ctx.quadraticCurveTo(sx + i + 1 + sway, sy - hgt, sx + i + 3 + sway, sy + 2);
     ctx.fill();
   }
-  // seam
-  ctx.fillStyle = 'rgba(0,0,0,.18)';
-  ctx.fillRect(sx, sy + 15, w, 2);
+  // dark seam under grass
+  ctx.fillStyle = 'rgba(69,26,3,.35)';
+  ctx.fillRect(sx, sy + 16, w, 3);
 }
 
 function drawBrickPlat(sx, sy, w, h, mov) {
@@ -1374,7 +1410,28 @@ function drawPipe(sx, sy, w, h) {
   ctx.fillRect(sx + 4, sy + 18, w - 8, 3);
 }
 
+function drawPitVoid() {
+  // darken gaps so pits don't read as flat sky/water
+  const gy = world.GY;
+  const gapSet = new Set();
+  for (let x = 0; x < world.WW; x++) gapSet.add(x);
+  for (const p of world.plats) {
+    if (p.type === 'ground') gapSet.delete(Math.round(p.x / T));
+  }
+  for (const gx of gapSet) {
+    const sx = gx * T - camX;
+    if (sx > W() + 40 || sx + T < -40) continue;
+    const g = ctx.createLinearGradient(0, gy, 0, H() + camY);
+    g.addColorStop(0, 'rgba(15,23,42,.15)');
+    g.addColorStop(0.2, 'rgba(69,26,3,.55)');
+    g.addColorStop(1, 'rgba(28,10,4,.92)');
+    ctx.fillStyle = g;
+    ctx.fillRect(sx, gy + 2, T + 1, H() + camY);
+  }
+}
+
 function drawPlats() {
+  drawPitVoid();
   for (const p of world.plats) {
     const sx = p.x - camX;
     if (sx > W() + 60 || sx + p.w < -60) continue;
@@ -1493,8 +1550,8 @@ function drawSolario() {
   const leg = player.on ? Math.sin(player.walk * Math.PI) * 5 : (player.vy < 0 ? -3 : 4);
   const arm = player.on ? -Math.sin(player.walk * Math.PI) * 4 : (player.vy < 0 ? -8 : 2);
   ctx.save();
-  ctx.translate(player.x + player.w / 2 - camX, player.y + player.h - ht * squash * 0.15);
-  ctx.scale(player.face * stretch, squash);
+  ctx.translate(player.x + player.w / 2 - camX, player.y + player.h - ht * squash * 0.05);
+  ctx.scale(player.face * stretch * 1.18, squash * 1.12);
   // ground shadow
   ctx.fillStyle = 'rgba(0,0,0,.18)';
   ctx.beginPath(); ctx.ellipse(0, 2, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill();
