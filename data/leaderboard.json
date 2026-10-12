@@ -79,13 +79,20 @@
     },
     {
       "name": "SAL",
-      "score": 1565,
-      "coins": 22,
-      "level": 1,
-      "ts": 1791830536830
+      "score": 2020,
+      "coins": 38,
+      "level": 2,
+      "ts": 1791830545980
     }
   ],
   "recent": [
+    {
+      "name": "SAL",
+      "score": 2020,
+      "coins": 38,
+      "level": 2,
+      "ts": 1791830545980
+    },
     {
       "name": "SAL",
       "score": 1565,
@@ -137,5 +144,5 @@
     }
   ],
   "version": 1,
-  "updatedAt": 1791830537005
+  "updatedAt": 1791830546489
 }
