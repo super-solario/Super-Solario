@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="lb-config.js"></script>
 <script src="leaderboard.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -401,7 +402,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
     <p class="desc">Grass Chain → Neon Reef → Lava Ledger → Moon Market. Enter a username, clear levels, and your best run syncs to the local board on this page.</p>
     <div class="play-grid">
       <div class="game-shell">
-        <div class="game-bar"><span>SUPER SOLARIO</span><span style="color:#14F195">v3.0 · GRASS CHAIN</span></div>
+        <div class="game-bar"><span>SUPER SOLARIO</span><span style="color:#14F195">v4.0 · LOCKED IN</span></div>
         <iframe id="gameFrame" src="super-solario-game.html" title="Super Solario" allow="autoplay; clipboard-write" loading="lazy"></iframe>
         <div class="game-note">
           Or <a href="super-solario-game.html" target="_blank" rel="noopener">open full screen</a>
@@ -411,7 +412,7 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
       <aside class="lb-panel" id="leaderboard">
         <div class="lb-head">
           <h3>DIAMOND HANDS BOARD</h3>
-          <div class="lb-live"><i></i> <span id="lbSeason">LOCAL</span></div>
+          <div class="lb-live"><i></i> <span id="lbSeason">GLOBAL</span></div>
         </div>
         <ol class="lb-list" id="lbList"></ol>
         <div class="lb-youbar" id="lbYou"></div>
@@ -544,7 +545,14 @@ footer{border-top:1px solid var(--line);padding:40px 20px 28px;background:#04040
   const esc = (s) => SolarioLB.escapeHtml(s);
 
   const seasonEl = document.getElementById('lbSeason');
-  if (seasonEl && SolarioLB.SEASON) seasonEl.textContent = SolarioLB.SEASON;
+  const setSeason = () => {
+    if (!seasonEl) return;
+    const s = (SolarioLB.getSeason && SolarioLB.getSeason()) || SolarioLB.SEASON || 'GLOBAL';
+    const online = SolarioLB.isRemoteOnline && SolarioLB.isRemoteOnline();
+    seasonEl.textContent = online ? s : (s + ' · CACHED');
+  };
+  setSeason();
+  SolarioLB.onUpdate(() => setSeason());
 
   // Contract / share helpers — set window.__SOLARIO_CA__ after mint to enable copy
   const caText = document.getElementById('caText');
