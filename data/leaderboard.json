@@ -1,1 +1,141 @@
-{"entries":[{"name":"DIAMOND_DEV","score":42069,"coins":180,"level":4,"ts":1760000000000},{"name":"MOONBAG","score":28800,"coins":140,"level":3,"ts":1760001000000},{"name":"HUMANQA3","score":23000,"coins":99,"level":3,"ts":1791829877475},{"name":"HUMANQA2","score":22000,"coins":91,"level":3,"ts":1791829858069},{"name":"SOLWHALE","score":19650,"coins":95,"level":3,"ts":1760002000000},{"name":"CFTEST","score":16000,"coins":60,"level":2,"ts":1791829791149},{"name":"BEARSLAYER","score":12400,"coins":72,"level":2,"ts":1760003000000},{"name":"DIRECT","score":12321,"coins":11,"level":1,"ts":1791829846095},{"name":"HODLR","score":8200,"coins":48,"level":2,"ts":1760004000000},{"name":"LOCKIN","score":7777,"coins":12,"level":1,"ts":1791829589497},{"name":"TUNNEL","score":5555,"coins":3,"level":1,"ts":1791829644404}],"recent":[{"name":"HUMANQA3","score":23000,"coins":99,"level":3,"ts":1791829877475},{"name":"HUMANQA2","score":22000,"coins":91,"level":3,"ts":1791829858069},{"name":"DIRECT","score":12321,"coins":11,"level":1,"ts":1791829846095},{"name":"CFTEST","score":16000,"coins":60,"level":2,"ts":1791829791149},{"name":"TUNNEL","score":5555,"coins":3,"level":1,"ts":1791829644404},{"name":"LOCKIN","score":7777,"coins":12,"level":1,"ts":1791829589497}],"version":1,"updatedAt":1791829877560}
+{
+  "entries": [
+    {
+      "name": "DIAMOND_DEV",
+      "score": 42069,
+      "coins": 180,
+      "level": 4,
+      "ts": 1760000000000
+    },
+    {
+      "name": "MOONBAG",
+      "score": 28800,
+      "coins": 140,
+      "level": 3,
+      "ts": 1760001000000
+    },
+    {
+      "name": "HUMANQA3",
+      "score": 23000,
+      "coins": 99,
+      "level": 3,
+      "ts": 1791829877475
+    },
+    {
+      "name": "HUMANQA2",
+      "score": 22000,
+      "coins": 91,
+      "level": 3,
+      "ts": 1791829858069
+    },
+    {
+      "name": "SOLWHALE",
+      "score": 19650,
+      "coins": 95,
+      "level": 3,
+      "ts": 1760002000000
+    },
+    {
+      "name": "CFTEST",
+      "score": 16000,
+      "coins": 60,
+      "level": 2,
+      "ts": 1791829791149
+    },
+    {
+      "name": "BEARSLAYER",
+      "score": 12400,
+      "coins": 72,
+      "level": 2,
+      "ts": 1760003000000
+    },
+    {
+      "name": "DIRECT",
+      "score": 12321,
+      "coins": 11,
+      "level": 1,
+      "ts": 1791829846095
+    },
+    {
+      "name": "HODLR",
+      "score": 8200,
+      "coins": 48,
+      "level": 2,
+      "ts": 1760004000000
+    },
+    {
+      "name": "LOCKIN",
+      "score": 7777,
+      "coins": 12,
+      "level": 1,
+      "ts": 1791829589497
+    },
+    {
+      "name": "TUNNEL",
+      "score": 5555,
+      "coins": 3,
+      "level": 1,
+      "ts": 1791829644404
+    },
+    {
+      "name": "SAL",
+      "score": 1565,
+      "coins": 22,
+      "level": 1,
+      "ts": 1791830536830
+    }
+  ],
+  "recent": [
+    {
+      "name": "SAL",
+      "score": 1565,
+      "coins": 22,
+      "level": 1,
+      "ts": 1791830536830
+    },
+    {
+      "name": "HUMANQA3",
+      "score": 23000,
+      "coins": 99,
+      "level": 3,
+      "ts": 1791829877475
+    },
+    {
+      "name": "HUMANQA2",
+      "score": 22000,
+      "coins": 91,
+      "level": 3,
+      "ts": 1791829858069
+    },
+    {
+      "name": "DIRECT",
+      "score": 12321,
+      "coins": 11,
+      "level": 1,
+      "ts": 1791829846095
+    },
+    {
+      "name": "CFTEST",
+      "score": 16000,
+      "coins": 60,
+      "level": 2,
+      "ts": 1791829791149
+    },
+    {
+      "name": "TUNNEL",
+      "score": 5555,
+      "coins": 3,
+      "level": 1,
+      "ts": 1791829644404
+    },
+    {
+      "name": "LOCKIN",
+      "score": 7777,
+      "coins": 12,
+      "level": 1,
+      "ts": 1791829589497
+    }
+  ],
+  "version": 1,
+  "updatedAt": 1791830537005
+}
