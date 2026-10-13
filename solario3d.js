@@ -147,7 +147,7 @@ const camR = () => keys.KeyE || keys.Period;
 const COURSES = [
   {
     name: 'Bob-omb Grass',
-    sky: 0x5eb8ff, fog: 0x9ed4ff, ground: 0x3ecf4a, dirt: 0xb45309, accent: 0x86efac,
+    sky: 0x5eb8ff, fog: 0x9ed4ff, ground: 0x22c55e, dirt: 0xa16207, accent: 0x4ade80,
     spawn: [0, 2.2, 0], flag: [46, 1, 0],
     plats: [
       // ground spine
@@ -677,7 +677,7 @@ function buildCourse(n) {
   player = {
     x: course.spawn[0], y: course.spawn[1], z: course.spawn[2],
     vx: 0, vy: 0, vz: 0,
-    on: false, coy: 0, jbuf: 0, face: 0, inv: 1.2, pound: false, long: false
+    on: false, coy: 0, jbuf: 0, face: Math.PI / 2, inv: 1.2, pound: false, long: false
   };
   if (checkpoint) {
     player.x = checkpoint.x; player.y = checkpoint.y; player.z = checkpoint.z;
@@ -692,8 +692,10 @@ function buildCourse(n) {
   shadowMesh.rotation.x = -Math.PI / 2;
   worldGroup.add(shadowMesh);
 
-  camera.position.set(player.x - 8, player.y + 5, player.z + 10);
-  camYaw = 0;
+  // Face down the course (+X) so W runs toward the flag
+  camYaw = Math.PI / 2;
+  camera.position.set(player.x - 10, player.y + 5.5, player.z + 0.5);
+  camera.lookAt(player.x + 4, player.y + 1.2, player.z);
 }
 
 // ── Collision ────────────────────────────────────────────
@@ -803,6 +805,7 @@ function hitQ(q) {
 function loadLevel() {
   clearLock = false;
   buildCourse(level);
+  camYaw = Math.PI / 2;
   toastT = 0;
   toast(course.name.toUpperCase());
   progEl.classList.add('show');
@@ -1023,10 +1026,7 @@ function update(dt) {
     }
   }
 
-  if (len > 0.1) {
-    const diff = ((player.face - camYaw + Math.PI) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI;
-    camYaw += diff * 0.04;
-  }
+  // Camera yaw is player-controlled (Q/E only) — auto-chase caused spin feedback with camera-relative move
 
   if (player.on) player.coy = COYOTE; else player.coy = Math.max(0, player.coy - dt);
   const jumpDown = jumpHeld() && !wasJump;
