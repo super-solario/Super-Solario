@@ -147,7 +147,7 @@ const camR = () => keys.KeyE || keys.Period;
 const COURSES = [
   {
     name: 'Bob-omb Grass',
-    sky: 0x5eb8ff, fog: 0x9ed4ff, ground: 0x22c55e, dirt: 0xa16207, accent: 0x4ade80,
+    sky: 0x57b0ff, fog: 0x8ecfff, ground: 0x3ddc64, dirt: 0x9a3412, accent: 0x86efac,
     spawn: [0, 2.2, 0], flag: [46, 1, 0],
     plats: [
       // ground spine
@@ -537,7 +537,7 @@ function buildCourse(n) {
   clearWorld();
   courseT = 0;
   scene.background = new THREE.Color(course.sky);
-  scene.fog = new THREE.Fog(course.fog, 22, 78);
+  scene.fog = new THREE.Fog(course.fog, 30, 95);
 
   if (skyDome) scene.remove(skyDome);
   const skyGeo = new THREE.SphereGeometry(90, 16, 12);
@@ -677,7 +677,7 @@ function buildCourse(n) {
   player = {
     x: course.spawn[0], y: course.spawn[1], z: course.spawn[2],
     vx: 0, vy: 0, vz: 0,
-    on: false, coy: 0, jbuf: 0, face: Math.PI / 2, inv: 1.2, pound: false, long: false
+    on: false, coy: 0, jbuf: 0, face: Math.PI / 2, inv: 2.0, pound: false, long: false
   };
   if (checkpoint) {
     player.x = checkpoint.x; player.y = checkpoint.y; player.z = checkpoint.z;
